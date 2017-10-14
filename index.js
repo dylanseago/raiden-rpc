@@ -18,7 +18,6 @@ function RaidenNode(rpcHost = DEFAULT_RPC_HOST, apiVersion = DEFAULT_API_VERSION
 function getLocalNode() {
   return new RaidenNode();
 }
-RaidenNode.getLocalNode = getLocalNode;
 
 function validateAmount(amount) {
   if (amount <= 0) throw new Error(`Deposit and transfer amounts must not be negative or zero (amount: ${amount})`);
@@ -28,7 +27,7 @@ function validateAddress(address) {
   if (!ethAddress.isAddress(address)) throw new Error(`Expected a valid ethereum address (got: ${address})`);
 }
 
-RaidenNode.prototype.raidenRequest = function (method, uri, ...options) {
+function raidenRequest(method, uri, ...options) {
   return request(Object.assign({
     method,
     uri,
@@ -38,41 +37,44 @@ RaidenNode.prototype.raidenRequest = function (method, uri, ...options) {
       'content-type': 'application/json',
     },
   }, ...options));
-};
+}
 
-RaidenNode.prototype.getAddress = function (options) {
+function getAddress(options) {
   return this.raidenRequest('GET', '/address', options).then(data => data.our_address);
-};
+}
 
-RaidenNode.prototype.registerToken = function (tokenAddress, options) {
+function registerToken(tokenAddress, options) {
   validateAddress(tokenAddress);
   return this.raidenRequest('PUT', `/tokens/${tokenAddress}`, options).then(data => data.channel_manager_address);
-};
+}
 
-RaidenNode.prototype.getRegisteredTokens = function (options) {
+function getRegisteredTokens(options) {
   return this.raidenRequest('GET', '/tokens', options);
-};
+}
 
-RaidenNode.prototype.getTokenPartners = function (tokenAddress, options) {
+function getTokenPartners(tokenAddress, options) {
   validateAddress(tokenAddress);
   return this.raidenRequest('GET', `/tokens/${tokenAddress}/partners`, options).then(partners =>
     partners.map(data => ({
       partner_address: data.partner_address,
       channel_address: data.channel.split('/').pop(), // extract address from channel uri
     })));
-};
+}
 
-RaidenNode.prototype.getChannel = function (channelAddress, options) {
-  validateAddress(tokenAddress);
+function getChannel(channelAddress, options) {
+  validateAddress(channelAddress);
   return this.raidenRequest('GET', `/channels/${channelAddress}`, options);
-};
+}
 
-RaidenNode.prototype.getAllChannels = function (options) {
+function getAllChannels(options) {
   return this.raidenRequest('GET', '/channels', options);
-};
+}
 
-RaidenNode.prototype.openChannel = function (partnerAddress, tokenAddress, initialBalance, settleTimeout, revealTimeout, options) {
-  validateAddress(tokenAddress);
+function openChannel(
+  partnerAddress, tokenAddress, initialBalance,
+  settleTimeout, revealTimeout, options,
+) {
+  validateAddress(partnerAddress);
   validateAddress(tokenAddress);
   return this.raidenRequest('PUT', '/channels', {
     body: Object.assign(
@@ -85,25 +87,25 @@ RaidenNode.prototype.openChannel = function (partnerAddress, tokenAddress, initi
       revealTimeout ? { reveal_timeout: revealTimeout } : {},
     ),
   }, options);
-};
+}
 
-RaidenNode.prototype.closeChannel = function (channelAddress, options) {
-  validateAddress(tokenAddress);
+function closeChannel(channelAddress, options) {
+  validateAddress(channelAddress);
   return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'closed' } }, options);
-};
+}
 
-RaidenNode.prototype.settleChannel = function (channelAddress, options) {
-  validateAddress(tokenAddress);
+function settleChannel(channelAddress, options) {
+  validateAddress(channelAddress);
   return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'settled' } }, options);
-};
+}
 
-RaidenNode.prototype.deposit = function (channelAddress, amount, options) {
-  validateAddress(tokenAddress);
+function deposit(channelAddress, amount, options) {
+  validateAddress(channelAddress);
   validateAmount(amount);
   return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } }, options);
-};
+}
 
-RaidenNode.prototype.joinNetwork = function (
+function joinNetwork(
   tokenAddress, depositAmount,
   numberOfChannels = 3, reserveDepositRatio = 0.4,
   options,
@@ -117,21 +119,27 @@ RaidenNode.prototype.joinNetwork = function (
       joinable_funds_target: reserveDepositRatio,
     },
   }, options);
-};
+}
 
-RaidenNode.prototype.leaveNetwork = function (tokenAddress, onlyReceivingChannels = true, options) {
+function leaveNetwork(tokenAddress, onlyReceivingChannels = true, options) {
   validateAddress(tokenAddress);
-  return this.raidenRequest('DELETE', `/connections/${tokenAddress}`, { body: { only_receiving_channels: onlyReceivingChannels } }, options);
-};
+  return this.raidenRequest('DELETE', `/connections/${tokenAddress}`, {
+    body: { only_receiving_channels: onlyReceivingChannels },
+  }, options);
+}
 
-RaidenNode.prototype.sendTokens = function (tokenAddress, recipientAddress, amount, transferId, options) {
+function sendTokens(
+  tokenAddress, recipientAddress,
+  amount, transferId, options,
+) {
   validateAddress(tokenAddress);
+  validateAddress(recipientAddress);
   validateAmount(amount);
   if (transferId && !Number.isInteger(transferId)) throw new Error('token transfer identifier must be an integer');
   return this.raidenRequest('POST', `/transfers/${tokenAddress}/${recipientAddress}`, {
     body: Object.assign({ amount }, transferId ? { identifier: transferId } : {}),
   }, options);
-};
+}
 
 function createTokenSwapBody(tokenSwap, isMaker) {
   const {
@@ -154,44 +162,67 @@ function createTokenSwapBody(tokenSwap, isMaker) {
   };
 }
 
-RaidenNode.prototype.makeTokenSwap = function (tokenSwap, options) {
+function makeTokenSwap(tokenSwap, options) {
   const { identifier, takerAddress } = tokenSwap;
+  validateAddress(takerAddress);
   return this.raidenRequest(
     'PUT',
     `/token_swaps/${takerAddress}/${identifier}`,
     { body: createTokenSwapBody(tokenSwap, true) },
     options,
   );
-};
+}
 
-RaidenNode.prototype.takeTokenSwap = function (tokenSwap, options) {
+function takeTokenSwap(tokenSwap, options) {
   const { identifier, makerAddress } = tokenSwap;
+  validateAddress(makerAddress);
   return this.raidenRequest(
     'PUT',
     `/token_swaps/${makerAddress}/${identifier}`,
     { body: createTokenSwapBody(tokenSwap, false) },
     options,
   );
-};
+}
 
 function getEvents(node, eventUri, fromBlock = 0, options) {
   if (fromBlock < 0) throw new Error(`block number must not be negative (block: ${fromBlock}`);
   return node.raidenRequest('GET', url.resolve('/events', eventUri), fromBlock ? { qs: { from_block: fromBlock } } : {}, options);
 }
 
-RaidenNode.prototype.getNetworkEvents = function (fromBlock, options) {
+function getNetworkEvents(fromBlock, options) {
   return getEvents(this, '/network', fromBlock, options);
-};
+}
 
-RaidenNode.prototype.getTokenEvents = function (tokenAddress, fromBlock, options) {
+function getTokenEvents(tokenAddress, fromBlock, options) {
   validateAddress(tokenAddress);
   return getEvents(this, `/tokens/${tokenAddress}`, fromBlock, options);
-};
+}
 
-RaidenNode.prototype.getChannelEvents = function (channelAddress, fromBlock, options) {
+function getChannelEvents(channelAddress, fromBlock, options) {
   validateAddress(channelAddress);
   return getEvents(this, `/channels/${channelAddress}`, fromBlock, options);
-};
+}
+
+RaidenNode.getLocalNode = getLocalNode;
+RaidenNode.prototype.raidenRequest = raidenRequest;
+RaidenNode.prototype.getAddress = getAddress;
+RaidenNode.prototype.registerToken = registerToken;
+RaidenNode.prototype.getRegisteredTokens = getRegisteredTokens;
+RaidenNode.prototype.getTokenPartners = getTokenPartners;
+RaidenNode.prototype.getChannel = getChannel;
+RaidenNode.prototype.getAllChannels = getAllChannels;
+RaidenNode.prototype.openChannel = openChannel;
+RaidenNode.prototype.closeChannel = closeChannel;
+RaidenNode.prototype.settleChannel = settleChannel;
+RaidenNode.prototype.deposit = deposit;
+RaidenNode.prototype.joinNetwork = joinNetwork;
+RaidenNode.prototype.leaveNetwork = leaveNetwork;
+RaidenNode.prototype.sendTokens = sendTokens;
+RaidenNode.prototype.makeTokenSwap = makeTokenSwap;
+RaidenNode.prototype.takeTokenSwap = takeTokenSwap;
+RaidenNode.prototype.getNetworkEvents = getNetworkEvents;
+RaidenNode.prototype.getTokenEvents = getTokenEvents;
+RaidenNode.prototype.getChannelEvents = getChannelEvents;
 
 module.exports = {
   RaidenNode,
