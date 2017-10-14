@@ -1,5 +1,7 @@
 const url = require('url');
 const request = require('request-promise-any');
+const ethAddress = require('ethereum-address');
+request.debug = true;
 
 const DEFAULT_RPC_HOST = 'http://127.0.0.1:5001/';
 const DEFAULT_API_VERSION = 1;
@@ -15,6 +17,10 @@ RaidenNode.getLocalNode = getLocalNode;
 
 function validateAmount(amount) {
   if (amount <= 0) throw new Error(`Deposit and transfer amounts must not be negative or zero (amount: ${amount})`);
+}
+
+function validateAddress(address) {
+  if (!ethAddress.isAddress(address)) throw new Error(`Expected a valid ethereum address (got: ${address})`);
 }
 
 RaidenNode.prototype.raidenRequest = function(method, uri, ...options) {
@@ -57,16 +63,18 @@ RaidenNode.prototype.getAllChannels = function(options) {
   return this.raidenRequest('GET', '/channels', options);
 }
 
-RaidenNode.prototype.openChannel = function(partnerAddress, tokenAddress, initialBalance, settleTimeout, options) {
+RaidenNode.prototype.openChannel = function(partnerAddress, tokenAddress, initialBalance, settleTimeout, revealTimeout, options) {
   return this.raidenRequest('PUT', '/channels', {
-    body: {
-      partner_address: partnerAddress,
-      token_address: tokenAddress,
-      balance: initialBalance,
-      settle_timeout: settleTimeout,
-    },
-    options,
-  });
+    body: Object.assign(
+      {
+        partner_address: partnerAddress,
+        token_address: tokenAddress,
+        balance: initialBalance,
+      },
+      settleTimeout ? { settle_timeout: settleTimeout } : {},
+      revealTimeout ? { reveal_timeout: revealTimeout } : {}
+    ),
+  }, options);
 }
 
 RaidenNode.prototype.closeChannel = function(channelAddress, options) {
