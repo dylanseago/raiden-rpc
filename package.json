@@ -1,0 +1,23 @@
+{
+  "name": "raidenjs",
+  "version": "1.0.0",
+  "description": "Node wrapper for raiden RPC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "dylanseago/raidenjs",
+  "author": "Dylan Seago (dylan.seago@gmail.com)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.4.0"
+  },
+  "dependencies": {
+    "request": "^2.83.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.8.0",
+    "eslint-config-airbnb-base": "^12.0.2",
+    "eslint-plugin-import": "^2.7.0"
+  }
+}
