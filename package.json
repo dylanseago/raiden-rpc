@@ -4,7 +4,8 @@
   "description": "Node wrapper for raiden RPC",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 60000"
+    "test": "mocha --timeout 60000",
+    "jsdoc": "jsdoc2md index.js"
   },
   "repository": "dylanseago/raiden-rpc",
   "author": "Dylan Seago (dylan.seago@gmail.com)",
@@ -13,9 +14,10 @@
     "node": ">=6.4.0"
   },
   "dependencies": {
+    "ethereum-address": "0.0.4",
+    "jsdoc-to-markdown": "^3.0.0",
     "request": "^2.83.0",
-    "request-promise-any": "^1.0.5",
-    "ethereum-address": "0.0.4"
+    "request-promise-any": "^1.0.5"
   },
   "devDependencies": {
     "chai": "^4.1.2",
