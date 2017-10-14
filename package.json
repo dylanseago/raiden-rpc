@@ -1,12 +1,12 @@
 {
-  "name": "raidenjs",
+  "name": "raiden-rpc",
   "version": "1.0.0",
   "description": "Node wrapper for raiden RPC",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
-  "repository": "dylanseago/raidenjs",
+  "repository": "dylanseago/raiden-rpc",
   "author": "Dylan Seago (dylan.seago@gmail.com)",
   "license": "MIT",
   "engines": {
@@ -19,6 +19,7 @@
   "devDependencies": {
     "eslint": "^4.8.0",
     "eslint-config-airbnb-base": "^12.0.2",
-    "eslint-plugin-import": "^2.7.0"
+    "eslint-plugin-import": "^2.7.0",
+    "mocha": "^4.0.1"
   }
 }
