@@ -4,57 +4,61 @@ const request = require('request-promise-any');
 const DEFAULT_RPC_HOST = 'http://127.0.0.1:5001/';
 const DEFAULT_API_VERSION = 1;
 
-const DEFAULT_OPTIONS = {
-  rpcHost: DEFAULT_RPC_HOST,
-  apiVersion: DEFAULT_API_VERSION,
-};
-
-function mergeOptions(...options) {
-  const merged = Object.assign({}, DEFAULT_OPTIONS, ...options);
-  merged.baseUrl = merged.baseUrl || url.resolve(merged.rpcHost, `/api/${merged.apiVersion}`);
-  delete merged.rpcHost;
-  delete merged.apiVersion;
-  return merged;
+function RaidenNode(rpcHost = DEFAULT_RPC_HOST, apiVersion = DEFAULT_API_VERSION) {
+  this.baseUrl = url.resolve(rpcHost, `/api/${apiVersion}`);
 }
 
-function raiden(method, uri, ...options) {
-  return request(mergeOptions({
+function getLocalNode() {
+  return new RaidenNode();
+}
+RaidenNode.getLocalNode = getLocalNode;
+
+function validateAmount(amount) {
+  if (amount <= 0) throw new Error(`Deposit and transfer amounts must not be negative or zero (amount: ${amount})`);
+}
+
+RaidenNode.prototype.raidenRequest = function(method, uri, ...options) {
+  return request(Object.assign({
     method,
     uri,
+    baseUrl: this.baseUrl,
     json: true,
+    headers: {
+      'content-type': 'application/json'
+    },
   }, ...options));
 }
 
-function getAddress(options) {
-  return raiden('GET', '/address', options).then(data => data.our_address);
+RaidenNode.prototype.getAddress = function(options) {
+  return this.raidenRequest('GET', '/address', options).then(data => data.our_address);
 }
 
-function registerToken(tokenAddress, options) {
-  return raiden('PUT', `/tokens/${tokenAddress}`, options).then(data => data.channel_manager_address);
+RaidenNode.prototype.registerToken = function(tokenAddress, options) {
+  return this.raidenRequest('PUT', `/tokens/${tokenAddress}`, options).then(data => data.channel_manager_address);
 }
 
-function getRegisteredTokens(options) {
-  return raiden('GET', '/tokens', options);
+RaidenNode.prototype.getRegisteredTokens = function(options) {
+  return this.raidenRequest('GET', '/tokens', options);
 }
 
-function getTokenPartners(tokenAddress, options) {
-  return raiden('GET', `/tokens/${tokenAddress}/partners`, options).then(partners =>
+RaidenNode.prototype.getTokenPartners = function(tokenAddress, options) {
+  return this.raidenRequest('GET', `/tokens/${tokenAddress}/partners`, options).then(partners =>
     partners.map(data => ({
       partner_address: data.partner_address,
       channel_address: data.channel.split('/').pop(), // extract address from channel uri
     })));
 }
 
-function getChannel(channelAddress, options) {
-  return raiden('GET', `/channels/${channelAddress}`, options);
+RaidenNode.prototype.getChannel = function(channelAddress, options) {
+  return this.raidenRequest('GET', `/channels/${channelAddress}`, options);
 }
 
-function getAllChannels(options) {
-  return raiden('GET', '/channels', options);
+RaidenNode.prototype.getAllChannels = function(options) {
+  return this.raidenRequest('GET', '/channels', options);
 }
 
-function openChannel(partnerAddress, tokenAddress, initialBalance, settleTimeout, options) {
-  return raiden('PUT', '/channels', {
+RaidenNode.prototype.openChannel = function(partnerAddress, tokenAddress, initialBalance, settleTimeout, options) {
+  return this.raidenRequest('PUT', '/channels', {
     body: {
       partner_address: partnerAddress,
       token_address: tokenAddress,
@@ -65,30 +69,26 @@ function openChannel(partnerAddress, tokenAddress, initialBalance, settleTimeout
   });
 }
 
-function closeChannel(channelAddress, options) {
-  return raiden('PATCH', `/channels/${channelAddress}`, { body: { state: 'closed' } }, options);
+RaidenNode.prototype.closeChannel = function(channelAddress, options) {
+  return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'closed' } }, options);
 }
 
-function settleChannel(channelAddress, options) {
-  return raiden('PATCH', `/channels/${channelAddress}`, { body: { state: 'settled' } }, options);
+RaidenNode.prototype.settleChannel = function(channelAddress, options) {
+  return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'settled' } }, options);
 }
 
-function validateDeposit(amount) {
-  if (amount <= 0) throw new Error(`Deposit and transfer amounts must not be negative or zero (amount: ${amount})`);
+RaidenNode.prototype.deposit = function(channelAddress, amount, options) {
+  validateAmount(amount);
+  return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } }, options);
 }
 
-function deposit(channelAddress, amount, options) {
-  validateDeposit(amount);
-  return raiden('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } }, options);
-}
-
-function joinNetwork(
+RaidenNode.prototype.joinNetwork = function(
   tokenAddress, depositAmount,
   numberOfChannels = 3, reserveDepositRatio = 0.4,
   options,
 ) {
-  validateDeposit(depositAmount);
-  return raiden('PUT', `/connection/${tokenAddress}`, {
+  validateAmount(depositAmount);
+  return this.raidenRequest('PUT', `/connections/${tokenAddress}`, {
     body: {
       funds: depositAmount,
       initial_channel_target: numberOfChannels,
@@ -97,14 +97,14 @@ function joinNetwork(
   }, options);
 }
 
-function leaveNetwork(tokenAddress, onlyReceivingChannels = true, options) {
-  return raiden('DELETE', `/connection/${tokenAddress}`, { body: { only_receiving_channels: onlyReceivingChannels } }, options);
+RaidenNode.prototype.leaveNetwork = function(tokenAddress, onlyReceivingChannels = true, options) {
+  return this.raidenRequest('DELETE', `/connections/${tokenAddress}`, { body: { only_receiving_channels: onlyReceivingChannels } }, options);
 }
 
-function sendTokens(tokenAddress, recipientAddress, amount, transferId, options) {
-  validateDeposit(amount);
+RaidenNode.prototype.sendTokens = function(tokenAddress, recipientAddress, amount, transferId, options) {
+  validateAmount(amount);
   if (transferId && !Number.isInteger(transferId)) throw new Error('token transfer identifier must be an integer');
-  return raiden('POST', `/transfers/${tokenAddress}/${recipientAddress}`, {
+  return this.raidenRequest('POST', `/transfers/${tokenAddress}/${recipientAddress}`, {
     body: Object.assign({ amount }, transferId ? { identifier: transferId } : {}),
   }, options);
 }
@@ -128,9 +128,9 @@ function createTokenSwapBody(tokenSwap, isMaker) {
   };
 }
 
-function makeTokenSwap(tokenSwap, options) {
+RaidenNode.prototype.makeTokenSwap = function(tokenSwap, options) {
   const { identifier, takerAddress } = tokenSwap;
-  return raiden(
+  return this.raidenRequest(
     'PUT',
     `/token_swaps/${takerAddress}/${identifier}`,
     { body: createTokenSwapBody(tokenSwap, true) },
@@ -138,9 +138,9 @@ function makeTokenSwap(tokenSwap, options) {
   );
 }
 
-function takeTokenSwap(tokenSwap, options) {
+RaidenNode.prototype.takeTokenSwap = function(tokenSwap, options) {
   const { identifier, makerAddress } = tokenSwap;
-  return raiden(
+  return this.raidenRequest(
     'PUT',
     `/token_swaps/${makerAddress}/${identifier}`,
     { body: createTokenSwapBody(tokenSwap, false) },
@@ -148,41 +148,24 @@ function takeTokenSwap(tokenSwap, options) {
   );
 }
 
-function getEvents(relativeUri, fromBlock = 0, options) {
+function getEvents(node, eventUri, fromBlock = 0, options) {
   if (fromBlock < 0) throw new Error(`block number must not be negative (block: ${fromBlock}`);
-  return raiden('GET', url.resolve('/events', relativeUri), fromBlock ? { qs: { from_block: fromBlock } } : {}, options);
+  return node.raidenRequest('GET', url.resolve('/events', eventUri), fromBlock ? { qs: { from_block: fromBlock } } : {}, options);
 }
 
-function getNetworkEvents(fromBlock, options) {
-  return getEvents('/network', fromBlock, options);
+RaidenNode.prototype.getNetworkEvents = function(fromBlock, options) {
+  return getEvents(this, '/network', fromBlock, options);
 }
 
-function getTokenEvents(tokenAddress, fromBlock, options) {
-  return getEvents(`/tokens/${tokenAddress}`, fromBlock, options);
+RaidenNode.prototype.getTokenEvents = function(tokenAddress, fromBlock, options) {
+  return getEvents(this, `/tokens/${tokenAddress}`, fromBlock, options);
 }
 
-function getChannelEvents(channelAddress, fromBlock, options) {
-  return getEvents(`/channels/${channelAddress}`, fromBlock, options);
+RaidenNode.prototype.getChannelEvents = function(channelAddress, fromBlock, options) {
+  return getEvents(this, `/channels/${channelAddress}`, fromBlock, options);
 }
 
 module.exports = {
-  raiden,
-  getAddress,
-  registerToken,
-  getRegisteredTokens,
-  getTokenPartners,
-  getChannel,
-  getAllChannels,
-  openChannel,
-  closeChannel,
-  settleChannel,
-  deposit,
-  joinNetwork,
-  leaveNetwork,
-  sendTokens,
-  makeTokenSwap,
-  takeTokenSwap,
-  getNetworkEvents,
-  getTokenEvents,
-  getChannelEvents,
-}
+  RaidenNode,
+  getLocalNode,
+};
