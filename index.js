@@ -16,7 +16,7 @@
   * Create a new raiden instance for a specific node. See below for possible options.
   * ```javascript
   * // Quick localhost development
-  * var localNode = RaidenClient.localNode(); // Uses ({@link module:raiden-rpc~DEFAULT_RPC_HOST})
+  * var localNode = RaidenClient.localNode(); // Uses DEFAULT_RPC_HOST
   * // Custom hostname
   * var myNode = new RaidenClient('http://192.168.1.124:5004');
   * ```
