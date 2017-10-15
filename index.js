@@ -26,7 +26,7 @@ const url = require('url');
 const request = require('request-promise-any');
 const ethAddress = require('ethereum-address');
 
-/** @constant {string}
+/** @constant {String}
   * @default
   */
 const DEFAULT_RPC_HOST = 'http://127.0.0.1:5001/';
@@ -37,8 +37,8 @@ const DEFAULT_API_VERSION = '1';
   *
   * @class
   *
-  * @param rpcHost {string} - the full raiden node hostname
-  * @param apiVersion {string} - the raiden api version
+  * @param [rpcHost] {String} - the full raiden node hostname
+  * @param [apiVersion] {String} - the raiden api version
   * @property baseUrl The baseUrl used to perform requests.
   *
   * @alias module:raiden-rpc
@@ -69,8 +69,8 @@ function validateAddress(address) {
   *
   * @instance
   *
-  * @param {string} method - request method to use
-  * @param {string} uri - the api endpoint to call (relative to {@link RaidenClient#baseUrl})
+  * @param {String} method - request method to use
+  * @param {String} uri - the api endpoint to call (relative to {@link RaidenClient#baseUrl})
   * @param {...Object} [options] - custom request options
   *
   * @example
@@ -98,7 +98,7 @@ function customRequest(method, uri, ...options) {
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
-  * @fulfill {string} - Ethereum address
+  * @fulfill {String} - Ethereum address
   * @reject {Error} - request error
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-your-address|Raiden docs}
   */
@@ -111,11 +111,11 @@ function getAddress(options) {
   *
   * @instance
   *
-  * @param {string} tokenAddress - Ethereum address
+  * @param {String} tokenAddress - Ethereum address
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
-  * @fulfill {string} - channel manager Ethereum address
+  * @fulfill {String} - channel manager Ethereum address
   * @reject {Error} - request error
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#registering-a-token|Raiden docs}
   */
@@ -132,7 +132,7 @@ function registerToken(tokenAddress, options) {
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
-  * @fulfill {string[]} - array of Ethereum addresses
+  * @fulfill {String[]} - array of Ethereum addresses
   * @reject {Error} - request error
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-traded-tokens|Raiden docs}
   */
@@ -145,7 +145,7 @@ function getRegisteredTokens(options) {
   *
   * @instance
   *
-  * @param {string} tokenAddress - Ethereum address
+  * @param {String} tokenAddress - Ethereum address
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -167,7 +167,7 @@ function getTokenPartners(tokenAddress, options) {
   *
   * @instance
   *
-  * @param {string} channelAddress - Ethereum address
+  * @param {String} channelAddress - Ethereum address
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -201,13 +201,13 @@ function getAllChannels(options) {
   *
   * @instance
   *
-  * @param {string} partnerAddress - Ethereum address of other Raiden node
-  * @param {string} tokenAddress - Ethereum address of token that will be transferred in
+  * @param {String} partnerAddress - Ethereum address of other Raiden node
+  * @param {String} tokenAddress - Ethereum address of token that will be transferred in
   * this channel
-  * @param {number} initialBalance - Tokens to initially deposit
-  * @param {number} [settleTimeout] - Number of blocks to wait for settlement after closing
+  * @param {Number} initialBalance - Tokens to initially deposit
+  * @param {Number} [settleTimeout] - Number of blocks to wait for settlement after closing
   * this channel
-  * @param {number} [revealTimeout] - Number of blocks to use for reveal timeout
+  * @param {Number} [revealTimeout] - Number of blocks to use for reveal timeout
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -241,7 +241,7 @@ function openChannel(
   *
   * @instance
   *
-  * @param {string} channelAddress - Ethereum address of channel
+  * @param {String} channelAddress - Ethereum address of channel
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -259,7 +259,7 @@ function closeChannel(channelAddress, options) {
   *
   * @instance
   *
-  * @param {string} channelAddress - Ethereum address of channel
+  * @param {String} channelAddress - Ethereum address of channel
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -277,8 +277,8 @@ function settleChannel(channelAddress, options) {
   *
   * @instance
   *
-  * @param {string} channelAddress - Ethereum address of channel
-  * @param {number} amount - number of tokens
+  * @param {String} channelAddress - Ethereum address of channel
+  * @param {Number} amount - number of tokens
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -297,10 +297,10 @@ function deposit(channelAddress, amount, options) {
   *
   * @instance
   *
-  * @param {string} tokenAddress - Ethereum address of token
-  * @param {number} depositAmount - Total number of tokens to deposit
-  * @param {number} [numberOfChannels] - Number of channels to open on the network
-  * @param {number} [reserveDepositRatio] - Ratio of tokens deposited that should be reserved for
+  * @param {String} tokenAddress - Ethereum address of token
+  * @param {Number} depositAmount - Total number of tokens to deposit
+  * @param {Number} [numberOfChannels] - Number of channels to open on the network
+  * @param {Number} [reserveDepositRatio] - Ratio of tokens deposited that should be reserved for
   * future channel creation. The rest are distributed amongst the {@link numberOfChannels} opened.
   * @param {Object} [options] - custom request options
   *
@@ -334,13 +334,13 @@ function joinNetwork(
   *
   * @instance
   *
-  * @param {string} tokenAddress - Ethereum address of token
+  * @param {String} tokenAddress - Ethereum address of token
   * @param {boolean} [onlyReceivingChannels] - true if channels that have received transfers
   * should be closed, false if every channel should be closed.
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
-  * @fulfill {string[]} - Ethereum addresses of all closed channels.
+  * @fulfill {String[]} - Ethereum addresses of all closed channels.
   * @reject {Error} - request error
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#leaving-a-token-network|Raiden docs}
   */
@@ -356,10 +356,10 @@ function leaveNetwork(tokenAddress, onlyReceivingChannels = true, options) {
   *
   * @instance
   *
-  * @param {string} tokenAddress - Ethereum address of token
-  * @param {string} recipientAddress - Ethereum address of recipient
-  * @param {number} amount - number of tokens to send
-  * @param {number} [transferId] - integer identifier to attach to the transfer
+  * @param {String} tokenAddress - Ethereum address of token
+  * @param {String} recipientAddress - Ethereum address of recipient
+  * @param {Number} amount - number of tokens to send
+  * @param {Number} [transferId] - integer identifier to attach to the transfer
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -407,13 +407,13 @@ function createTokenSwapBody(tokenSwap, isMaker) {
   * @instance
   *
   * @param {Object} tokenSwap - object representing the token swap
-  * @param {number} tokenSwap.identifier - Integer identifier to use for this swap
-  * @param {string} [tokenSwap.makerAddress] - Ethereum address of the swap maker
-  * @param {string} tokenSwap.makerToken - Ethereum address of token the maker wants to swap
-  * @param {number} tokenSwap.makerAmount - number of tokens the maker wants to swap
-  * @param {string} tokenSwap.takerAddress - Ethereum address of the swap taker
-  * @param {string} tokenSwap.takerToken - Ethereum address of token the taker will swap
-  * @param {number} tokenSwap.takerAmount - number of tokens the taker will swap
+  * @param {Number} tokenSwap.identifier - Integer identifier to use for this swap
+  * @param {String} [tokenSwap.makerAddress] - Ethereum address of the swap maker
+  * @param {String} tokenSwap.makerToken - Ethereum address of token the maker wants to swap
+  * @param {Number} tokenSwap.makerAmount - number of tokens the maker wants to swap
+  * @param {String} tokenSwap.takerAddress - Ethereum address of the swap taker
+  * @param {String} tokenSwap.takerToken - Ethereum address of token the taker will swap
+  * @param {Number} tokenSwap.takerAmount - number of tokens the taker will swap
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -438,13 +438,13 @@ function makeTokenSwap(tokenSwap, options) {
   * @instance
   *
   * @param {Object} tokenSwap - object representing the token swap
-  * @param {number} tokenSwap.identifier - Integer identifier of the swap
-  * @param {string} tokenSwap.makerAddress - Ethereum address of the swap maker
-  * @param {string} tokenSwap.makerToken - Ethereum address of token the maker wants to swap
-  * @param {number} tokenSwap.makerAmount - number of tokens the maker wants to swap
-  * @param {string} [tokenSwap.takerAddress] - Ethereum address of the swap taker
-  * @param {string} tokenSwap.takerToken - Ethereum address of token the taker will swap
-  * @param {number} tokenSwap.takerAmount - number of tokens the taker will swap
+  * @param {Number} tokenSwap.identifier - Integer identifier of the swap
+  * @param {String} tokenSwap.makerAddress - Ethereum address of the swap maker
+  * @param {String} tokenSwap.makerToken - Ethereum address of token the maker wants to swap
+  * @param {Number} tokenSwap.makerAmount - number of tokens the maker wants to swap
+  * @param {String} [tokenSwap.takerAddress] - Ethereum address of the swap taker
+  * @param {String} tokenSwap.takerToken - Ethereum address of token the taker will swap
+  * @param {Number} tokenSwap.takerAmount - number of tokens the taker will swap
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -473,7 +473,7 @@ function getEvents(node, eventUri, fromBlock = 0, options) {
   *
   * @instance
   *
-  * @param {number} [fromBlock] - only get events that occurred after this block
+  * @param {Number} [fromBlock] - only get events that occurred after this block
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -490,8 +490,8 @@ function getNetworkEvents(fromBlock, options) {
   *
   * @instance
   *
-  * @param {string} tokenAddress - Ethereum address of token
-  * @param {number} [fromBlock] - only get events that occurred after this block
+  * @param {String} tokenAddress - Ethereum address of token
+  * @param {Number} [fromBlock] - only get events that occurred after this block
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}
@@ -509,8 +509,8 @@ function getTokenEvents(tokenAddress, fromBlock, options) {
   *
   * @instance
   *
-  * @param {string} channelAddress - Ethereum address of channel
-  * @param {number} [fromBlock] - only get events that occurred after this block
+  * @param {String} channelAddress - Ethereum address of channel
+  * @param {Number} [fromBlock] - only get events that occurred after this block
   * @param {Object} [options] - custom request options
   *
   * @returns {Promise}

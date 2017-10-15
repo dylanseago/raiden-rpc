@@ -24,7 +24,7 @@ var myNode = new RaidenClient('http://192.168.1.124:5004');
 
 * [raiden-rpc](#module_raiden-rpc)
     * [RaidenClient](#exp_module_raiden-rpc--RaidenClient) ⏏
-        * [new RaidenClient(rpcHost, apiVersion)](#new_module_raiden-rpc--RaidenClient_new)
+        * [new RaidenClient([rpcHost], [apiVersion])](#new_module_raiden-rpc--RaidenClient_new)
         * _instance_
             * [.customRequest(method, uri, [...options])](#module_raiden-rpc--RaidenClient+customRequest)
             * [.getAddress([options])](#module_raiden-rpc--RaidenClient+getAddress) ⇒ <code>Promise</code>
@@ -48,7 +48,7 @@ var myNode = new RaidenClient('http://192.168.1.124:5004');
         * _static_
             * [.localNode()](#module_raiden-rpc--RaidenClient.localNode) ⇒ <code>Raiden</code>
         * _inner_
-            * [~DEFAULT_RPC_HOST](#module_raiden-rpc--RaidenClient..DEFAULT_RPC_HOST) : <code>string</code>
+            * [~DEFAULT_RPC_HOST](#module_raiden-rpc--RaidenClient..DEFAULT_RPC_HOST) : <code>String</code>
 
 <a name="exp_module_raiden-rpc--RaidenClient"></a>
 
@@ -62,13 +62,13 @@ var myNode = new RaidenClient('http://192.168.1.124:5004');
 
 <a name="new_module_raiden-rpc--RaidenClient_new"></a>
 
-#### new RaidenClient(rpcHost, apiVersion)
+#### new RaidenClient([rpcHost], [apiVersion])
 A class that represents a raiden node. Holds information used to connect to it's rpc interface.
 
 **Params**
 
-- rpcHost <code>string</code> - the full raiden node hostname
-- apiVersion <code>string</code> - the raiden api version
+- [rpcHost] <code>String</code> - the full raiden node hostname
+- [apiVersion] <code>String</code> - the raiden api version
 
 <a name="module_raiden-rpc--RaidenClient+customRequest"></a>
 
@@ -78,8 +78,8 @@ Performs a manual API call on the Raiden node.
 **Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Params**
 
-- method <code>string</code> - request method to use
-- uri <code>string</code> - the api endpoint to call (relative to [RaidenClient#baseUrl](RaidenClient#baseUrl))
+- method <code>String</code> - request method to use
+- uri <code>String</code> - the api endpoint to call (relative to [RaidenClient#baseUrl](RaidenClient#baseUrl))
 - [...options] <code>Object</code> - custom request options
 
 **Example**  
@@ -92,7 +92,7 @@ myNode.customRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: 
 Retrieves the Ethereum address associated with the node
 
 **Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
-**Fulfill**: <code>string</code> - Ethereum address  
+**Fulfill**: <code>String</code> - Ethereum address  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-your-address)  
 **Params**
@@ -105,12 +105,12 @@ Retrieves the Ethereum address associated with the node
 Registers a token by deploying a channel manager.
 
 **Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
-**Fulfill**: <code>string</code> - channel manager Ethereum address  
+**Fulfill**: <code>String</code> - channel manager Ethereum address  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#registering-a-token)  
 **Params**
 
-- tokenAddress <code>string</code> - Ethereum address
+- tokenAddress <code>String</code> - Ethereum address
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+getRegisteredTokens"></a>
@@ -119,7 +119,7 @@ Registers a token by deploying a channel manager.
 Get a list of addresses of all registered tokens.
 
 **Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
-**Fulfill**: <code>string[]</code> - array of Ethereum addresses  
+**Fulfill**: <code>String[]</code> - array of Ethereum addresses  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-traded-tokens)  
 **Params**
@@ -137,7 +137,7 @@ Get a list of all partners you have non-settled channels with.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-partners-for-a-token)  
 **Params**
 
-- tokenAddress <code>string</code> - Ethereum address
+- tokenAddress <code>String</code> - Ethereum address
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+getChannel"></a>
@@ -151,7 +151,7 @@ Query information about your channel.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-a-specific-channel)  
 **Params**
 
-- channelAddress <code>string</code> - Ethereum address
+- channelAddress <code>String</code> - Ethereum address
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+getAllChannels"></a>
@@ -183,13 +183,13 @@ Creates a channel with a partner.
 
 **Params**
 
-- partnerAddress <code>string</code> - Ethereum address of other Raiden node
-- tokenAddress <code>string</code> - Ethereum address of token that will be transferred in
+- partnerAddress <code>String</code> - Ethereum address of other Raiden node
+- tokenAddress <code>String</code> - Ethereum address of token that will be transferred in
 this channel
-- initialBalance <code>number</code> - Tokens to initially deposit
-- [settleTimeout] <code>number</code> - Number of blocks to wait for settlement after closing
+- initialBalance <code>Number</code> - Tokens to initially deposit
+- [settleTimeout] <code>Number</code> - Number of blocks to wait for settlement after closing
 this channel
-- [revealTimeout] <code>number</code> - Number of blocks to use for reveal timeout
+- [revealTimeout] <code>Number</code> - Number of blocks to use for reveal timeout
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+closeChannel"></a>
@@ -203,7 +203,7 @@ Closes an open channel.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#close-channel)  
 **Params**
 
-- channelAddress <code>string</code> - Ethereum address of channel
+- channelAddress <code>String</code> - Ethereum address of channel
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+settleChannel"></a>
@@ -217,7 +217,7 @@ Settle a closed channel.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#settle-channel)  
 **Params**
 
-- channelAddress <code>string</code> - Ethereum address of channel
+- channelAddress <code>String</code> - Ethereum address of channel
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+deposit"></a>
@@ -231,8 +231,8 @@ Deposit more tokens into a channel. Token to deposit was specified on channel cr
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#deposit-to-a-channel)  
 **Params**
 
-- channelAddress <code>string</code> - Ethereum address of channel
-- amount <code>number</code> - number of tokens
+- channelAddress <code>String</code> - Ethereum address of channel
+- amount <code>Number</code> - number of tokens
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+joinNetwork"></a>
@@ -246,10 +246,10 @@ Join an existing token network.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#connecting-to-a-token-network)  
 **Params**
 
-- tokenAddress <code>string</code> - Ethereum address of token
-- depositAmount <code>number</code> - Total number of tokens to deposit
-- [numberOfChannels] <code>number</code> <code> = 3</code> - Number of channels to open on the network
-- [reserveDepositRatio] <code>number</code> <code> = 0.4</code> - Ratio of tokens deposited that should be reserved for
+- tokenAddress <code>String</code> - Ethereum address of token
+- depositAmount <code>Number</code> - Total number of tokens to deposit
+- [numberOfChannels] <code>Number</code> <code> = 3</code> - Number of channels to open on the network
+- [reserveDepositRatio] <code>Number</code> <code> = 0.4</code> - Ratio of tokens deposited that should be reserved for
 future channel creation. The rest are distributed amongst the [numberOfChannels](numberOfChannels) opened.
 - [options] <code>Object</code> - custom request options
 
@@ -263,12 +263,12 @@ Important note. If no arguments are given then raiden will only close and settle
 where your node has received transfers.
 
 **Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
-**Fulfill**: <code>string[]</code> - Ethereum addresses of all closed channels.  
+**Fulfill**: <code>String[]</code> - Ethereum addresses of all closed channels.  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#leaving-a-token-network)  
 **Params**
 
-- tokenAddress <code>string</code> - Ethereum address of token
+- tokenAddress <code>String</code> - Ethereum address of token
 - [onlyReceivingChannels] <code>boolean</code> <code> = true</code> - true if channels that have received transfers
 should be closed, false if every channel should be closed.
 - [options] <code>Object</code> - custom request options
@@ -284,10 +284,10 @@ Transfer tokens to a recipient.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#initiating-a-transfer)  
 **Params**
 
-- tokenAddress <code>string</code> - Ethereum address of token
-- recipientAddress <code>string</code> - Ethereum address of recipient
-- amount <code>number</code> - number of tokens to send
-- [transferId] <code>number</code> - integer identifier to attach to the transfer
+- tokenAddress <code>String</code> - Ethereum address of token
+- recipientAddress <code>String</code> - Ethereum address of recipient
+- amount <code>Number</code> - number of tokens to send
+- [transferId] <code>Number</code> - integer identifier to attach to the transfer
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+makeTokenSwap"></a>
@@ -302,13 +302,13 @@ Request a token swap to atomically exchange two tokens with a specified recipien
 **Params**
 
 - tokenSwap <code>Object</code> - object representing the token swap
-    - .identifier <code>number</code> - Integer identifier to use for this swap
-    - [.makerAddress] <code>string</code> - Ethereum address of the swap maker
-    - .makerToken <code>string</code> - Ethereum address of token the maker wants to swap
-    - .makerAmount <code>number</code> - number of tokens the maker wants to swap
-    - .takerAddress <code>string</code> - Ethereum address of the swap taker
-    - .takerToken <code>string</code> - Ethereum address of token the taker will swap
-    - .takerAmount <code>number</code> - number of tokens the taker will swap
+    - .identifier <code>Number</code> - Integer identifier to use for this swap
+    - [.makerAddress] <code>String</code> - Ethereum address of the swap maker
+    - .makerToken <code>String</code> - Ethereum address of token the maker wants to swap
+    - .makerAmount <code>Number</code> - number of tokens the maker wants to swap
+    - .takerAddress <code>String</code> - Ethereum address of the swap taker
+    - .takerToken <code>String</code> - Ethereum address of token the taker will swap
+    - .takerAmount <code>Number</code> - number of tokens the taker will swap
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+takeTokenSwap"></a>
@@ -323,13 +323,13 @@ Accept a token swap to atomically exchange two tokens with a specified recipient
 **Params**
 
 - tokenSwap <code>Object</code> - object representing the token swap
-    - .identifier <code>number</code> - Integer identifier of the swap
-    - .makerAddress <code>string</code> - Ethereum address of the swap maker
-    - .makerToken <code>string</code> - Ethereum address of token the maker wants to swap
-    - .makerAmount <code>number</code> - number of tokens the maker wants to swap
-    - [.takerAddress] <code>string</code> - Ethereum address of the swap taker
-    - .takerToken <code>string</code> - Ethereum address of token the taker will swap
-    - .takerAmount <code>number</code> - number of tokens the taker will swap
+    - .identifier <code>Number</code> - Integer identifier of the swap
+    - .makerAddress <code>String</code> - Ethereum address of the swap maker
+    - .makerToken <code>String</code> - Ethereum address of token the maker wants to swap
+    - .makerAmount <code>Number</code> - number of tokens the maker wants to swap
+    - [.takerAddress] <code>String</code> - Ethereum address of the swap taker
+    - .takerToken <code>String</code> - Ethereum address of token the taker will swap
+    - .takerAmount <code>Number</code> - number of tokens the taker will swap
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+getNetworkEvents"></a>
@@ -343,7 +343,7 @@ Query for registry network events.
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-general-network-events)  
 **Params**
 
-- [fromBlock] <code>number</code> - only get events that occurred after this block
+- [fromBlock] <code>Number</code> - only get events that occurred after this block
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+getTokenEvents"></a>
@@ -357,8 +357,8 @@ Query for all new channels opened for a token
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-token-network-events)  
 **Params**
 
-- tokenAddress <code>string</code> - Ethereum address of token
-- [fromBlock] <code>number</code> - only get events that occurred after this block
+- tokenAddress <code>String</code> - Ethereum address of token
+- [fromBlock] <code>Number</code> - only get events that occurred after this block
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient+getChannelEvents"></a>
@@ -372,8 +372,8 @@ Query for events tied to a specific channel
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-channel-events)  
 **Params**
 
-- channelAddress <code>string</code> - Ethereum address of channel
-- [fromBlock] <code>number</code> - only get events that occurred after this block
+- channelAddress <code>String</code> - Ethereum address of channel
+- [fromBlock] <code>Number</code> - only get events that occurred after this block
 - [options] <code>Object</code> - custom request options
 
 <a name="module_raiden-rpc--RaidenClient.localNode"></a>
@@ -384,6 +384,6 @@ Returns a new instance of [RaideNode](RaideNode) connecting to the default local
 **Kind**: static method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 <a name="module_raiden-rpc--RaidenClient..DEFAULT_RPC_HOST"></a>
 
-#### RaidenClient~DEFAULT_RPC_HOST : <code>string</code>
+#### RaidenClient~DEFAULT_RPC_HOST : <code>String</code>
 **Kind**: inner constant of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
-**Default**: <code>&quot;http://127.0.0.1:5001/&quot;</code>  
+**Default**: <code>http://127.0.0.1:5001/</code>  
