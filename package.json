@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --timeout 60000",
-    "docs": "jsdoc2md index.js > api.md"
+    "docs": "jsdoc2md --param-list-format list index.js > api.md"
   },
   "repository": "dylanseago/raiden-rpc",
   "author": "Dylan Seago (dylan.seago@gmail.com)",
