@@ -20,6 +20,21 @@
   * // Custom hostname
   * var myNode = new RaidenClient('http://192.168.1.124:5004');
   * ```
+  * Join a token network and transfer tokens to another node
+  * ```javascript
+  * const testnetToken = '0x0f114a1e9db192502e7856309cc899952b3db1ed';
+  * const recipientAddress = '0x61c808d82a3ac53231750dadc13c777b59310bd9';
+  * // Retrieve our own address as sanity check
+  * myNode.getAddress()
+  *   // Deposit 100 testnet tokens, 20 amongst 3 channels, 40 reserved for future channels
+  *   .then(myAddress => myNode.joinNetwork(testnetToken, 100, 3, 0.4))
+  *   // Promise resolves after all channels opened
+  *   // Send 8 tokens to recipient with transfer ID 1337
+  *   .then(() => myNode.sendTokens(testnetToken, recipientAddress, 8, 1337))
+  *   // Promise resolves after transfer succeeds or fails
+  *   // Leave the token network
+  *   .then(() => myNode.leaveNetwork(testnetToken));
+  * ```
   */
 
 const url = require('url');
