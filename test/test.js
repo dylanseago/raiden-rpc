@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const chai = require('chai');
 const ethAddress = require('ethereum-address');
 const { RaidenNode } = require('../index.js');
@@ -13,35 +14,57 @@ function expectEthAddress(address) {
   expect(ethAddress.isAddress(address)).to.be.true;
 }
 
+function describeEach(message, arr, cb) {
+  arr.forEach((elem, index) => {
+    describe(`${message}[${index}]`, () => {
+      cb(elem, index);
+    });
+  });
+}
+
 describe('RaidenNode', () => {
   const nodes = raidenEndpoints.map(ep => new RaidenNode(ep));
 
-  nodes.forEach((node, index) => {
-    describe(`node[${index}]`, () => {
-      describe('#getAddress()', () => {
-        it('should return valid address', () =>
-          node.getAddress().then((address) => {
-            expectEthAddress(address);
-            node.address = address;
-          }));
-      });
+  describeEach('node', nodes, (node) => {
+    describe('#getAddress()', () => {
+      it('should return valid address', () =>
+        node.getAddress().then((address) => {
+          expectEthAddress(address);
+          node.address = address;
+        }));
+    });
 
-      describe('#getRegisteredTokens()', () => {
-        it('should return testnetToken', () =>
-          node.getRegisteredTokens().then((tokens) => {
-            expect(tokens).to.include(testnetToken);
-          }));
-      });
+    describe('#getRegisteredTokens()', () => {
+      it('should return testnetToken', () =>
+        node.getRegisteredTokens().then((tokens) => {
+          expect(tokens).to.include(testnetToken);
+        }));
+    });
 
-      describe('#joinNetwork()', () => {
-        it('should connect to testnetToken network', () =>
-          node.joinNetwork(testnetToken, 40));
-      });
+    describe('#joinNetwork()', () => {
+      it('should connect to testnetToken network', () =>
+        node.joinNetwork(testnetToken, 40));
+    });
+  });
 
-      describe('#leaveNetwork()', () => {
-        it('should leave the testnetToken network without receiving anything', () =>
-          node.leaveNetwork(testnetToken, false));
-      });
+  const transferId = Date.now();
+  const amountSent = 7;
+  describe('#sendTokens', () => {
+    it('node[0] should send tokens', () =>
+      nodes[0].sendTokens(testnetToken, nodes[1].address, amountSent, transferId));
+  });
+
+  describe('#getTokenEvents', () => {
+    let events;
+    it('node[1] should query token events', () =>
+      nodes[1].getTokenEvents(testnetToken).then((result) => { events = result; }));
+    console.log(events);
+  });
+
+  describeEach('node', nodes, (node) => {
+    describe('#leaveNetwork()', () => {
+      it('should leave the testnetToken network', () =>
+        node.leaveNetwork(testnetToken));
     });
   });
 
