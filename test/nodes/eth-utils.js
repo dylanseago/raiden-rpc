@@ -8,6 +8,19 @@ const ethAddress = require('ethereum-address');
 
 const DEFAULT_RPC = 'https://localhost:8545';
 
+function normalize(address) {
+  if (address.indexOf('0x') === -1) {
+    return `0x${address}`;
+  }
+  return address;
+}
+
+function validateAddress(address) {
+  if (!ethAddress.isAddress(address)) {
+    throw new Error(`Invalid Ethereum address ${address}`);
+  }
+}
+
 /**
   * Retrieves balance of address using rpc
   *
@@ -17,12 +30,8 @@ const DEFAULT_RPC = 'https://localhost:8545';
   * @return {Number} balance in wei
   */
 function getBalance(address, rpcEndpoint = DEFAULT_RPC) {
-  if (address.indexOf('0x') === -1) {
-    address = `0x${address}`;
-  }
-  if (!ethAddress.isAddress(address)) {
-    throw new Error(`Invalid address ${address}`);
-  }
+  address = normalize(address);
+  validateAddress(address);
   return request.post(rpcEndpoint, {
     json: true,
     body: {
@@ -46,6 +55,8 @@ function getBalance(address, rpcEndpoint = DEFAULT_RPC) {
   * @reject {Error} - request error
   */
 function pollBalance(address, interval, condition, rpcEndpoint = DEFAULT_RPC) {
+  address = normalize(address);
+  validateAddress(address);
   return Promise.resolve()
     .then(() => getBalance(address, rpcEndpoint))
     .then(balance => (condition(balance)
@@ -56,6 +67,8 @@ function pollBalance(address, interval, condition, rpcEndpoint = DEFAULT_RPC) {
 }
 
 module.exports = {
+  normalize,
+  validateAddress,
   getBalance,
   pollBalance,
 };
