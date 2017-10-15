@@ -1,6 +1,6 @@
 /**
   * @module raiden-rpc
-  * @desc A module for interacting with RPC api of a Raiden network node.
+  * @desc A module for interacting with a Raiden network node over RPC.
   *
   * **Installation**
   * ```
@@ -10,14 +10,14 @@
   * @example
   * Require the library
   * ```javascript
-  * var RaidenNode = require('raiden-rpc');
+  * var RaidenClient = require('raiden-rpc');
   * ```
-  * Create a new raiden node instance. See below for possible options.
+  * Create a new raiden instance for a specific node. See below for possible options.
   * ```javascript
   * // Quick localhost development
-  * var localNode = RaidenNode.newLocalNode(); // Uses ({@link DEFAULT_RPC_HOST})
+  * var localNode = RaidenClient.localNode(); // Uses ({@link DEFAULT_RPC_HOST})
   * // Custom hostname
-  * var raidenNode = new RaidenNode('http://192.168.1.124:5004');
+  * var myNode = new RaidenClient('http://192.168.1.124:5004');
   * ```
   */
 
@@ -42,17 +42,17 @@ const DEFAULT_API_VERSION = '1';
   *
   * @alias module:raiden-rpc
   */
-function RaidenNode(rpcHost = DEFAULT_RPC_HOST, apiVersion = DEFAULT_API_VERSION) {
+function RaidenClient(rpcHost = DEFAULT_RPC_HOST, apiVersion = DEFAULT_API_VERSION) {
   this.baseUrl = url.resolve(rpcHost, `/api/${apiVersion}`);
 }
 
 /**
   * Returns a new instance of {@link RaideNode} connecting to the default localhost node.
   * @static
-  * @returns {RaidenNode}
+  * @returns {Raiden}
   */
-function getLocalNode() {
-  return new RaidenNode();
+function localNode() {
+  return new RaidenClient();
 }
 
 function validateAmount(amount) {
@@ -64,20 +64,20 @@ function validateAddress(address) {
 }
 
 /**
-  * Performs a Raiden RPC request.
+  * Performs a manual API call on the Raiden node.
   *
   * @instance
   *
   * @param {string} method - request method to use
-  * @param {string} uri - the api endpoint to call (relative to {@link RaidenNode#baseUrl})
+  * @param {string} uri - the api endpoint to call (relative to {@link RaidenClient#baseUrl})
   * @param {...Object} [options] - custom request options
   *
   * @example
   * ```javascript
-  * myNode.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } })
+  * myNode.customRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } })
   * ```
   */
-function raidenRequest(method, uri, ...options) {
+function customRequest(method, uri, ...options) {
   return request(Object.assign({
     method,
     uri,
@@ -102,7 +102,7 @@ function raidenRequest(method, uri, ...options) {
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-your-address|Raiden docs}
   */
 function getAddress(options) {
-  return this.raidenRequest('GET', '/address', options).then(data => data.our_address);
+  return this.customRequest('GET', '/address', options).then(data => data.our_address);
 }
 
 /**
@@ -120,7 +120,7 @@ function getAddress(options) {
   */
 function registerToken(tokenAddress, options) {
   validateAddress(tokenAddress);
-  return this.raidenRequest('PUT', `/tokens/${tokenAddress}`, options).then(data => data.channel_manager_address);
+  return this.customRequest('PUT', `/tokens/${tokenAddress}`, options).then(data => data.channel_manager_address);
 }
 
 /**
@@ -136,7 +136,7 @@ function registerToken(tokenAddress, options) {
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-traded-tokens|Raiden docs}
   */
 function getRegisteredTokens(options) {
-  return this.raidenRequest('GET', '/tokens', options);
+  return this.customRequest('GET', '/tokens', options);
 }
 
 /**
@@ -154,7 +154,7 @@ function getRegisteredTokens(options) {
   */
 function getTokenPartners(tokenAddress, options) {
   validateAddress(tokenAddress);
-  return this.raidenRequest('GET', `/tokens/${tokenAddress}/partners`, options).then(partners =>
+  return this.customRequest('GET', `/tokens/${tokenAddress}/partners`, options).then(partners =>
     partners.map(data => ({
       partner_address: data.partner_address,
       channel_address: data.channel.split('/').pop(), // extract address from channel uri
@@ -176,7 +176,7 @@ function getTokenPartners(tokenAddress, options) {
   */
 function getChannel(channelAddress, options) {
   validateAddress(channelAddress);
-  return this.raidenRequest('GET', `/channels/${channelAddress}`, options);
+  return this.customRequest('GET', `/channels/${channelAddress}`, options);
 }
 
 /**
@@ -192,7 +192,7 @@ function getChannel(channelAddress, options) {
   * @see {@link https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-channels|Raiden docs}
   */
 function getAllChannels(options) {
-  return this.raidenRequest('GET', '/channels', options);
+  return this.customRequest('GET', '/channels', options);
 }
 
 /**
@@ -222,7 +222,7 @@ function openChannel(
 ) {
   validateAddress(partnerAddress);
   validateAddress(tokenAddress);
-  return this.raidenRequest('PUT', '/channels', {
+  return this.customRequest('PUT', '/channels', {
     body: Object.assign(
       {
         partner_address: partnerAddress,
@@ -250,7 +250,7 @@ function openChannel(
   */
 function closeChannel(channelAddress, options) {
   validateAddress(channelAddress);
-  return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'closed' } }, options);
+  return this.customRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'closed' } }, options);
 }
 
 /**
@@ -268,7 +268,7 @@ function closeChannel(channelAddress, options) {
   */
 function settleChannel(channelAddress, options) {
   validateAddress(channelAddress);
-  return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'settled' } }, options);
+  return this.customRequest('PATCH', `/channels/${channelAddress}`, { body: { state: 'settled' } }, options);
 }
 
 /**
@@ -288,7 +288,7 @@ function settleChannel(channelAddress, options) {
 function deposit(channelAddress, amount, options) {
   validateAddress(channelAddress);
   validateAmount(amount);
-  return this.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } }, options);
+  return this.customRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } }, options);
 }
 
 /**
@@ -315,7 +315,7 @@ function joinNetwork(
 ) {
   validateAddress(tokenAddress);
   validateAmount(depositAmount);
-  return this.raidenRequest('PUT', `/connections/${tokenAddress}`, {
+  return this.customRequest('PUT', `/connections/${tokenAddress}`, {
     body: {
       funds: depositAmount,
       initial_channel_target: numberOfChannels,
@@ -345,7 +345,7 @@ function joinNetwork(
   */
 function leaveNetwork(tokenAddress, onlyReceivingChannels = true, options) {
   validateAddress(tokenAddress);
-  return this.raidenRequest('DELETE', `/connections/${tokenAddress}`, {
+  return this.customRequest('DELETE', `/connections/${tokenAddress}`, {
     body: { only_receiving_channels: onlyReceivingChannels },
   }, options);
 }
@@ -374,7 +374,7 @@ function sendTokens(
   validateAddress(recipientAddress);
   validateAmount(amount);
   if (transferId && !Number.isInteger(transferId)) throw new Error('token transfer identifier must be an integer');
-  return this.raidenRequest('POST', `/transfers/${tokenAddress}/${recipientAddress}`, {
+  return this.customRequest('POST', `/transfers/${tokenAddress}/${recipientAddress}`, {
     body: Object.assign({ amount }, transferId ? { identifier: transferId } : {}),
   }, options);
 }
@@ -423,7 +423,7 @@ function createTokenSwapBody(tokenSwap, isMaker) {
 function makeTokenSwap(tokenSwap, options) {
   const { identifier, takerAddress } = tokenSwap;
   validateAddress(takerAddress);
-  return this.raidenRequest(
+  return this.customRequest(
     'PUT',
     `/token_swaps/${takerAddress}/${identifier}`,
     { body: createTokenSwapBody(tokenSwap, true) },
@@ -454,7 +454,7 @@ function makeTokenSwap(tokenSwap, options) {
 function takeTokenSwap(tokenSwap, options) {
   const { identifier, makerAddress } = tokenSwap;
   validateAddress(makerAddress);
-  return this.raidenRequest(
+  return this.customRequest(
     'PUT',
     `/token_swaps/${makerAddress}/${identifier}`,
     { body: createTokenSwapBody(tokenSwap, false) },
@@ -464,7 +464,7 @@ function takeTokenSwap(tokenSwap, options) {
 
 function getEvents(node, eventUri, fromBlock = 0, options) {
   if (fromBlock < 0) throw new Error(`block number must not be negative (block: ${fromBlock}`);
-  return node.raidenRequest('GET', url.resolve('/events', eventUri), fromBlock ? { qs: { from_block: fromBlock } } : {}, options);
+  return node.customRequest('GET', url.resolve('/events', eventUri), fromBlock ? { qs: { from_block: fromBlock } } : {}, options);
 }
 
 /**
@@ -522,25 +522,25 @@ function getChannelEvents(channelAddress, fromBlock, options) {
   return getEvents(this, `/channels/${channelAddress}`, fromBlock, options);
 }
 
-RaidenNode.getLocalNode = getLocalNode;
-RaidenNode.prototype.raidenRequest = raidenRequest;
-RaidenNode.prototype.getAddress = getAddress;
-RaidenNode.prototype.registerToken = registerToken;
-RaidenNode.prototype.getRegisteredTokens = getRegisteredTokens;
-RaidenNode.prototype.getTokenPartners = getTokenPartners;
-RaidenNode.prototype.getChannel = getChannel;
-RaidenNode.prototype.getAllChannels = getAllChannels;
-RaidenNode.prototype.openChannel = openChannel;
-RaidenNode.prototype.closeChannel = closeChannel;
-RaidenNode.prototype.settleChannel = settleChannel;
-RaidenNode.prototype.deposit = deposit;
-RaidenNode.prototype.joinNetwork = joinNetwork;
-RaidenNode.prototype.leaveNetwork = leaveNetwork;
-RaidenNode.prototype.sendTokens = sendTokens;
-RaidenNode.prototype.makeTokenSwap = makeTokenSwap;
-RaidenNode.prototype.takeTokenSwap = takeTokenSwap;
-RaidenNode.prototype.getNetworkEvents = getNetworkEvents;
-RaidenNode.prototype.getTokenEvents = getTokenEvents;
-RaidenNode.prototype.getChannelEvents = getChannelEvents;
+RaidenClient.localNode = localNode;
+RaidenClient.prototype.customRequest = customRequest;
+RaidenClient.prototype.getAddress = getAddress;
+RaidenClient.prototype.registerToken = registerToken;
+RaidenClient.prototype.getRegisteredTokens = getRegisteredTokens;
+RaidenClient.prototype.getTokenPartners = getTokenPartners;
+RaidenClient.prototype.getChannel = getChannel;
+RaidenClient.prototype.getAllChannels = getAllChannels;
+RaidenClient.prototype.openChannel = openChannel;
+RaidenClient.prototype.closeChannel = closeChannel;
+RaidenClient.prototype.settleChannel = settleChannel;
+RaidenClient.prototype.deposit = deposit;
+RaidenClient.prototype.joinNetwork = joinNetwork;
+RaidenClient.prototype.leaveNetwork = leaveNetwork;
+RaidenClient.prototype.sendTokens = sendTokens;
+RaidenClient.prototype.makeTokenSwap = makeTokenSwap;
+RaidenClient.prototype.takeTokenSwap = takeTokenSwap;
+RaidenClient.prototype.getNetworkEvents = getNetworkEvents;
+RaidenClient.prototype.getTokenEvents = getTokenEvents;
+RaidenClient.prototype.getChannelEvents = getChannelEvents;
 
-module.exports = RaidenNode;
+module.exports = RaidenClient;

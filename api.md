@@ -1,7 +1,7 @@
 <a name="module_raiden-rpc"></a>
 
 ## raiden-rpc
-A module for interacting with RPC api of a Raiden network node.
+A module for interacting with a Raiden network node over RPC.
 
 **Installation**
 ```
@@ -11,47 +11,47 @@ npm install raiden-rpc
 **Example**  
 Require the library
 ```javascript
-var RaidenNode = require('raiden-rpc');
+var RaidenClient = require('raiden-rpc');
 ```
-Create a new raiden node instance. See below for possible options.
+Create a new raiden instance for a specific node. See below for possible options.
 ```javascript
 // Quick localhost development
-var localNode = RaidenNode.newLocalNode(); // Uses ([DEFAULT_RPC_HOST](DEFAULT_RPC_HOST))
+var localNode = RaidenClient.localNode(); // Uses ([DEFAULT_RPC_HOST](DEFAULT_RPC_HOST))
 // Custom hostname
-var raidenNode = new RaidenNode('http://192.168.1.124:5004');
+var myNode = new RaidenClient('http://192.168.1.124:5004');
 ```
 
 * [raiden-rpc](#module_raiden-rpc)
-    * [RaidenNode](#exp_module_raiden-rpc--RaidenNode) ⏏
-        * [new RaidenNode(rpcHost, apiVersion)](#new_module_raiden-rpc--RaidenNode_new)
+    * [RaidenClient](#exp_module_raiden-rpc--RaidenClient) ⏏
+        * [new RaidenClient(rpcHost, apiVersion)](#new_module_raiden-rpc--RaidenClient_new)
         * _instance_
-            * [.raidenRequest(method, uri, [...options])](#module_raiden-rpc--RaidenNode+raidenRequest)
-            * [.getAddress([options])](#module_raiden-rpc--RaidenNode+getAddress) ⇒ <code>Promise</code>
-            * [.registerToken(tokenAddress, [options])](#module_raiden-rpc--RaidenNode+registerToken) ⇒ <code>Promise</code>
-            * [.getRegisteredTokens([options])](#module_raiden-rpc--RaidenNode+getRegisteredTokens) ⇒ <code>Promise</code>
-            * [.getTokenPartners(tokenAddress, [options])](#module_raiden-rpc--RaidenNode+getTokenPartners) ⇒ <code>Promise</code>
-            * [.getChannel(channelAddress, [options])](#module_raiden-rpc--RaidenNode+getChannel) ⇒ <code>Promise</code>
-            * [.getAllChannels([options])](#module_raiden-rpc--RaidenNode+getAllChannels) ⇒ <code>Promise</code>
-            * [.openChannel(partnerAddress, tokenAddress, initialBalance, [settleTimeout], [revealTimeout], [options])](#module_raiden-rpc--RaidenNode+openChannel) ⇒ <code>Promise</code>
-            * [.closeChannel(channelAddress, [options])](#module_raiden-rpc--RaidenNode+closeChannel) ⇒ <code>Promise</code>
-            * [.settleChannel(channelAddress, [options])](#module_raiden-rpc--RaidenNode+settleChannel) ⇒ <code>Promise</code>
-            * [.deposit(channelAddress, amount, [options])](#module_raiden-rpc--RaidenNode+deposit) ⇒ <code>Promise</code>
-            * [.joinNetwork(tokenAddress, depositAmount, [numberOfChannels], [reserveDepositRatio], [options])](#module_raiden-rpc--RaidenNode+joinNetwork) ⇒ <code>Promise</code>
-            * [.leaveNetwork(tokenAddress, [onlyReceivingChannels], [options])](#module_raiden-rpc--RaidenNode+leaveNetwork) ⇒ <code>Promise</code>
-            * [.sendTokens(tokenAddress, recipientAddress, amount, [transferId], [options])](#module_raiden-rpc--RaidenNode+sendTokens) ⇒ <code>Promise</code>
-            * [.makeTokenSwap(tokenSwap, [options])](#module_raiden-rpc--RaidenNode+makeTokenSwap) ⇒ <code>Promise</code>
-            * [.takeTokenSwap(tokenSwap, [options])](#module_raiden-rpc--RaidenNode+takeTokenSwap) ⇒ <code>Promise</code>
-            * [.getNetworkEvents([fromBlock], [options])](#module_raiden-rpc--RaidenNode+getNetworkEvents) ⇒ <code>Promise</code>
-            * [.getTokenEvents(tokenAddress, [fromBlock], [options])](#module_raiden-rpc--RaidenNode+getTokenEvents) ⇒ <code>Promise</code>
-            * [.getChannelEvents(channelAddress, [fromBlock], [options])](#module_raiden-rpc--RaidenNode+getChannelEvents) ⇒ <code>Promise</code>
+            * [.customRequest(method, uri, [...options])](#module_raiden-rpc--RaidenClient+customRequest)
+            * [.getAddress([options])](#module_raiden-rpc--RaidenClient+getAddress) ⇒ <code>Promise</code>
+            * [.registerToken(tokenAddress, [options])](#module_raiden-rpc--RaidenClient+registerToken) ⇒ <code>Promise</code>
+            * [.getRegisteredTokens([options])](#module_raiden-rpc--RaidenClient+getRegisteredTokens) ⇒ <code>Promise</code>
+            * [.getTokenPartners(tokenAddress, [options])](#module_raiden-rpc--RaidenClient+getTokenPartners) ⇒ <code>Promise</code>
+            * [.getChannel(channelAddress, [options])](#module_raiden-rpc--RaidenClient+getChannel) ⇒ <code>Promise</code>
+            * [.getAllChannels([options])](#module_raiden-rpc--RaidenClient+getAllChannels) ⇒ <code>Promise</code>
+            * [.openChannel(partnerAddress, tokenAddress, initialBalance, [settleTimeout], [revealTimeout], [options])](#module_raiden-rpc--RaidenClient+openChannel) ⇒ <code>Promise</code>
+            * [.closeChannel(channelAddress, [options])](#module_raiden-rpc--RaidenClient+closeChannel) ⇒ <code>Promise</code>
+            * [.settleChannel(channelAddress, [options])](#module_raiden-rpc--RaidenClient+settleChannel) ⇒ <code>Promise</code>
+            * [.deposit(channelAddress, amount, [options])](#module_raiden-rpc--RaidenClient+deposit) ⇒ <code>Promise</code>
+            * [.joinNetwork(tokenAddress, depositAmount, [numberOfChannels], [reserveDepositRatio], [options])](#module_raiden-rpc--RaidenClient+joinNetwork) ⇒ <code>Promise</code>
+            * [.leaveNetwork(tokenAddress, [onlyReceivingChannels], [options])](#module_raiden-rpc--RaidenClient+leaveNetwork) ⇒ <code>Promise</code>
+            * [.sendTokens(tokenAddress, recipientAddress, amount, [transferId], [options])](#module_raiden-rpc--RaidenClient+sendTokens) ⇒ <code>Promise</code>
+            * [.makeTokenSwap(tokenSwap, [options])](#module_raiden-rpc--RaidenClient+makeTokenSwap) ⇒ <code>Promise</code>
+            * [.takeTokenSwap(tokenSwap, [options])](#module_raiden-rpc--RaidenClient+takeTokenSwap) ⇒ <code>Promise</code>
+            * [.getNetworkEvents([fromBlock], [options])](#module_raiden-rpc--RaidenClient+getNetworkEvents) ⇒ <code>Promise</code>
+            * [.getTokenEvents(tokenAddress, [fromBlock], [options])](#module_raiden-rpc--RaidenClient+getTokenEvents) ⇒ <code>Promise</code>
+            * [.getChannelEvents(channelAddress, [fromBlock], [options])](#module_raiden-rpc--RaidenClient+getChannelEvents) ⇒ <code>Promise</code>
         * _static_
-            * [.getLocalNode()](#module_raiden-rpc--RaidenNode.getLocalNode) ⇒ <code>RaidenNode</code>
+            * [.localNode()](#module_raiden-rpc--RaidenClient.localNode) ⇒ <code>Raiden</code>
         * _inner_
-            * [~DEFAULT_RPC_HOST](#module_raiden-rpc--RaidenNode..DEFAULT_RPC_HOST) : <code>string</code>
+            * [~DEFAULT_RPC_HOST](#module_raiden-rpc--RaidenClient..DEFAULT_RPC_HOST) : <code>string</code>
 
-<a name="exp_module_raiden-rpc--RaidenNode"></a>
+<a name="exp_module_raiden-rpc--RaidenClient"></a>
 
-### RaidenNode ⏏
+### RaidenClient ⏏
 **Kind**: Exported class  
 **Properties**
 
@@ -59,9 +59,9 @@ var raidenNode = new RaidenNode('http://192.168.1.124:5004');
 | --- | --- |
 | baseUrl | The baseUrl used to perform requests. |
 
-<a name="new_module_raiden-rpc--RaidenNode_new"></a>
+<a name="new_module_raiden-rpc--RaidenClient_new"></a>
 
-#### new RaidenNode(rpcHost, apiVersion)
+#### new RaidenClient(rpcHost, apiVersion)
 A class that represents a raiden node. Holds information used to connect to it's rpc interface.
 
 **Params**
@@ -69,28 +69,28 @@ A class that represents a raiden node. Holds information used to connect to it's
 - rpcHost <code>string</code> - the full raiden node hostname
 - apiVersion <code>string</code> - the raiden api version
 
-<a name="module_raiden-rpc--RaidenNode+raidenRequest"></a>
+<a name="module_raiden-rpc--RaidenClient+customRequest"></a>
 
-#### raidenNode.raidenRequest(method, uri, [...options])
-Performs a Raiden RPC request.
+#### raidenClient.customRequest(method, uri, [...options])
+Performs a manual API call on the Raiden node.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Params**
 
 - method <code>string</code> - request method to use
-- uri <code>string</code> - the api endpoint to call (relative to [RaidenNode#baseUrl](RaidenNode#baseUrl))
+- uri <code>string</code> - the api endpoint to call (relative to [RaidenClient#baseUrl](RaidenClient#baseUrl))
 - [...options] <code>Object</code> - custom request options
 
 **Example**  
 ```javascript
-myNode.raidenRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } })
+myNode.customRequest('PATCH', `/channels/${channelAddress}`, { body: { balance: amount } })
 ```
-<a name="module_raiden-rpc--RaidenNode+getAddress"></a>
+<a name="module_raiden-rpc--RaidenClient+getAddress"></a>
 
-#### raidenNode.getAddress([options]) ⇒ <code>Promise</code>
+#### raidenClient.getAddress([options]) ⇒ <code>Promise</code>
 Retrieves the Ethereum address associated with the node
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>string</code> - Ethereum address  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-your-address)  
@@ -98,12 +98,12 @@ Retrieves the Ethereum address associated with the node
 
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+registerToken"></a>
+<a name="module_raiden-rpc--RaidenClient+registerToken"></a>
 
-#### raidenNode.registerToken(tokenAddress, [options]) ⇒ <code>Promise</code>
+#### raidenClient.registerToken(tokenAddress, [options]) ⇒ <code>Promise</code>
 Registers a token by deploying a channel manager.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>string</code> - channel manager Ethereum address  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#registering-a-token)  
@@ -112,12 +112,12 @@ Registers a token by deploying a channel manager.
 - tokenAddress <code>string</code> - Ethereum address
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getRegisteredTokens"></a>
+<a name="module_raiden-rpc--RaidenClient+getRegisteredTokens"></a>
 
-#### raidenNode.getRegisteredTokens([options]) ⇒ <code>Promise</code>
+#### raidenClient.getRegisteredTokens([options]) ⇒ <code>Promise</code>
 Get a list of addresses of all registered tokens.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>string[]</code> - array of Ethereum addresses  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-traded-tokens)  
@@ -125,12 +125,12 @@ Get a list of addresses of all registered tokens.
 
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getTokenPartners"></a>
+<a name="module_raiden-rpc--RaidenClient+getTokenPartners"></a>
 
-#### raidenNode.getTokenPartners(tokenAddress, [options]) ⇒ <code>Promise</code>
+#### raidenClient.getTokenPartners(tokenAddress, [options]) ⇒ <code>Promise</code>
 Get a list of all partners you have non-settled channels with.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object[]</code> - array of objects containing channel_address and partner_address  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-partners-for-a-token)  
@@ -139,12 +139,12 @@ Get a list of all partners you have non-settled channels with.
 - tokenAddress <code>string</code> - Ethereum address
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getChannel"></a>
+<a name="module_raiden-rpc--RaidenClient+getChannel"></a>
 
-#### raidenNode.getChannel(channelAddress, [options]) ⇒ <code>Promise</code>
+#### raidenClient.getChannel(channelAddress, [options]) ⇒ <code>Promise</code>
 Query information about your channel.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object</code> - object containing information about your channel  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-a-specific-channel)  
@@ -153,12 +153,12 @@ Query information about your channel.
 - channelAddress <code>string</code> - Ethereum address
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getAllChannels"></a>
+<a name="module_raiden-rpc--RaidenClient+getAllChannels"></a>
 
-#### raidenNode.getAllChannels([options]) ⇒ <code>Promise</code>
+#### raidenClient.getAllChannels([options]) ⇒ <code>Promise</code>
 Get a list of all non-settled channels.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object[]</code> - array of objects containing information about your channels  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-all-channels)  
@@ -166,12 +166,12 @@ Get a list of all non-settled channels.
 
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+openChannel"></a>
+<a name="module_raiden-rpc--RaidenClient+openChannel"></a>
 
-#### raidenNode.openChannel(partnerAddress, tokenAddress, initialBalance, [settleTimeout], [revealTimeout], [options]) ⇒ <code>Promise</code>
+#### raidenClient.openChannel(partnerAddress, tokenAddress, initialBalance, [settleTimeout], [revealTimeout], [options]) ⇒ <code>Promise</code>
 Creates a channel with a partner.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object</code> - objects containing information about your newly created channel  
 **Reject**: <code>Error</code> - request error  
 **See**
@@ -191,12 +191,12 @@ this channel
 - [revealTimeout] <code>number</code> - Number of blocks to use for reveal timeout
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+closeChannel"></a>
+<a name="module_raiden-rpc--RaidenClient+closeChannel"></a>
 
-#### raidenNode.closeChannel(channelAddress, [options]) ⇒ <code>Promise</code>
+#### raidenClient.closeChannel(channelAddress, [options]) ⇒ <code>Promise</code>
 Closes an open channel.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object</code> - object containing information about your channel  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#close-channel)  
@@ -205,12 +205,12 @@ Closes an open channel.
 - channelAddress <code>string</code> - Ethereum address of channel
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+settleChannel"></a>
+<a name="module_raiden-rpc--RaidenClient+settleChannel"></a>
 
-#### raidenNode.settleChannel(channelAddress, [options]) ⇒ <code>Promise</code>
+#### raidenClient.settleChannel(channelAddress, [options]) ⇒ <code>Promise</code>
 Settle a closed channel.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object</code> - object containing information about your channel  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#settle-channel)  
@@ -219,12 +219,12 @@ Settle a closed channel.
 - channelAddress <code>string</code> - Ethereum address of channel
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+deposit"></a>
+<a name="module_raiden-rpc--RaidenClient+deposit"></a>
 
-#### raidenNode.deposit(channelAddress, amount, [options]) ⇒ <code>Promise</code>
+#### raidenClient.deposit(channelAddress, amount, [options]) ⇒ <code>Promise</code>
 Deposit more tokens into a channel. Token to deposit was specified on channel creation.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object</code> - object containing information about your channel  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#deposit-to-a-channel)  
@@ -234,12 +234,12 @@ Deposit more tokens into a channel. Token to deposit was specified on channel cr
 - amount <code>number</code> - number of tokens
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+joinNetwork"></a>
+<a name="module_raiden-rpc--RaidenClient+joinNetwork"></a>
 
-#### raidenNode.joinNetwork(tokenAddress, depositAmount, [numberOfChannels], [reserveDepositRatio], [options]) ⇒ <code>Promise</code>
+#### raidenClient.joinNetwork(tokenAddress, depositAmount, [numberOfChannels], [reserveDepositRatio], [options]) ⇒ <code>Promise</code>
 Join an existing token network.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: - no content  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#connecting-to-a-token-network)  
@@ -252,16 +252,16 @@ Join an existing token network.
 future channel creation. The rest are distributed amongst the [numberOfChannels](numberOfChannels) opened.
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+leaveNetwork"></a>
+<a name="module_raiden-rpc--RaidenClient+leaveNetwork"></a>
 
-#### raidenNode.leaveNetwork(tokenAddress, [onlyReceivingChannels], [options]) ⇒ <code>Promise</code>
+#### raidenClient.leaveNetwork(tokenAddress, [onlyReceivingChannels], [options]) ⇒ <code>Promise</code>
 Close all open channels on a token network. The promise will only fulfill once all blockchain
 calls for closing/settling a channel have completed.
 
 Important note. If no arguments are given then raiden will only close and settle channels
 where your node has received transfers.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>string[]</code> - Ethereum addresses of all closed channels.  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#leaving-a-token-network)  
@@ -272,12 +272,12 @@ where your node has received transfers.
 should be closed, false if every channel should be closed.
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+sendTokens"></a>
+<a name="module_raiden-rpc--RaidenClient+sendTokens"></a>
 
-#### raidenNode.sendTokens(tokenAddress, recipientAddress, amount, [transferId], [options]) ⇒ <code>Promise</code>
+#### raidenClient.sendTokens(tokenAddress, recipientAddress, amount, [transferId], [options]) ⇒ <code>Promise</code>
 Transfer tokens to a recipient.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object</code> - object containing information about your transfer  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#initiating-a-transfer)  
@@ -289,12 +289,12 @@ Transfer tokens to a recipient.
 - [transferId] <code>number</code> - integer identifier to attach to the transfer
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+makeTokenSwap"></a>
+<a name="module_raiden-rpc--RaidenClient+makeTokenSwap"></a>
 
-#### raidenNode.makeTokenSwap(tokenSwap, [options]) ⇒ <code>Promise</code>
+#### raidenClient.makeTokenSwap(tokenSwap, [options]) ⇒ <code>Promise</code>
 Request a token swap to atomically exchange two tokens with a specified recipient.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: - no content  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#token-swaps)  
@@ -310,12 +310,12 @@ Request a token swap to atomically exchange two tokens with a specified recipien
     - .takerAmount <code>number</code> - number of tokens the taker will swap
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+takeTokenSwap"></a>
+<a name="module_raiden-rpc--RaidenClient+takeTokenSwap"></a>
 
-#### raidenNode.takeTokenSwap(tokenSwap, [options]) ⇒ <code>Promise</code>
+#### raidenClient.takeTokenSwap(tokenSwap, [options]) ⇒ <code>Promise</code>
 Accept a token swap to atomically exchange two tokens with a specified recipient.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: - no content  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#token-swaps)  
@@ -331,12 +331,12 @@ Accept a token swap to atomically exchange two tokens with a specified recipient
     - .takerAmount <code>number</code> - number of tokens the taker will swap
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getNetworkEvents"></a>
+<a name="module_raiden-rpc--RaidenClient+getNetworkEvents"></a>
 
-#### raidenNode.getNetworkEvents([fromBlock], [options]) ⇒ <code>Promise</code>
+#### raidenClient.getNetworkEvents([fromBlock], [options]) ⇒ <code>Promise</code>
 Query for registry network events.
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object[]</code> - array of objects containing information about each event  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-general-network-events)  
@@ -345,12 +345,12 @@ Query for registry network events.
 - [fromBlock] <code>number</code> - only get events that occurred after this block
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getTokenEvents"></a>
+<a name="module_raiden-rpc--RaidenClient+getTokenEvents"></a>
 
-#### raidenNode.getTokenEvents(tokenAddress, [fromBlock], [options]) ⇒ <code>Promise</code>
+#### raidenClient.getTokenEvents(tokenAddress, [fromBlock], [options]) ⇒ <code>Promise</code>
 Query for all new channels opened for a token
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object[]</code> - array of objects containing information about each event  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-token-network-events)  
@@ -360,12 +360,12 @@ Query for all new channels opened for a token
 - [fromBlock] <code>number</code> - only get events that occurred after this block
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode+getChannelEvents"></a>
+<a name="module_raiden-rpc--RaidenClient+getChannelEvents"></a>
 
-#### raidenNode.getChannelEvents(channelAddress, [fromBlock], [options]) ⇒ <code>Promise</code>
+#### raidenClient.getChannelEvents(channelAddress, [fromBlock], [options]) ⇒ <code>Promise</code>
 Query for events tied to a specific channel
 
-**Kind**: instance method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+**Kind**: instance method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Fulfill**: <code>Object[]</code> - array of objects containing information about each event  
 **Reject**: <code>Error</code> - request error  
 **See**: [Raiden docs](https://raiden-network.readthedocs.io/en/stable/rest_api.html#querying-channel-events)  
@@ -375,14 +375,14 @@ Query for events tied to a specific channel
 - [fromBlock] <code>number</code> - only get events that occurred after this block
 - [options] <code>Object</code> - custom request options
 
-<a name="module_raiden-rpc--RaidenNode.getLocalNode"></a>
+<a name="module_raiden-rpc--RaidenClient.localNode"></a>
 
-#### RaidenNode.getLocalNode() ⇒ <code>RaidenNode</code>
+#### RaidenClient.localNode() ⇒ <code>Raiden</code>
 Returns a new instance of [RaideNode](RaideNode) connecting to the default localhost node.
 
-**Kind**: static method of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
-<a name="module_raiden-rpc--RaidenNode..DEFAULT_RPC_HOST"></a>
+**Kind**: static method of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
+<a name="module_raiden-rpc--RaidenClient..DEFAULT_RPC_HOST"></a>
 
-#### RaidenNode~DEFAULT_RPC_HOST : <code>string</code>
-**Kind**: inner constant of [<code>RaidenNode</code>](#exp_module_raiden-rpc--RaidenNode)  
+#### RaidenClient~DEFAULT_RPC_HOST : <code>string</code>
+**Kind**: inner constant of [<code>RaidenClient</code>](#exp_module_raiden-rpc--RaidenClient)  
 **Default**: <code>&quot;http://127.0.0.1:5001/&quot;</code>  
