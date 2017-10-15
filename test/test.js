@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 const chai = require('chai');
 const ethAddress = require('ethereum-address');
-const { RaidenNode } = require('../index.js');
+const RaidenClient = require('../index.js');
 
 const { expect } = chai;
 
-const raidenEndpoints = ['http://localhost:5001', 'http://localhost:5002'];
+const raidenEndpoints = ['http://localhost:5000', 'http://localhost:5001'];
 const testnetToken = '0x0f114a1e9db192502e7856309cc899952b3db1ed';
 const settleTimeout = 100;
 const revealTimeout = 30;
@@ -22,8 +22,8 @@ function describeEach(message, arr, cb) {
   });
 }
 
-describe('RaidenNode', () => {
-  const nodes = raidenEndpoints.map(ep => new RaidenNode(ep));
+describe('RaidenClient', () => {
+  const nodes = raidenEndpoints.map(ep => new RaidenClient(ep));
 
   describeEach('node', nodes, (node) => {
     describe('#getAddress()', () => {
