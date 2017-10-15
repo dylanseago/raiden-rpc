@@ -1,6 +1,7 @@
 /**
   * @module raiden-rpc
   * @desc A module for interacting with a Raiden network node over RPC.
+  * @author Dylan Seago
   *
   * **Installation**
   * ```
@@ -15,7 +16,7 @@
   * Create a new raiden instance for a specific node. See below for possible options.
   * ```javascript
   * // Quick localhost development
-  * var localNode = RaidenClient.localNode(); // Uses ({@link DEFAULT_RPC_HOST})
+  * var localNode = RaidenClient.localNode(); // Uses ({@link module:raiden-rpc~DEFAULT_RPC_HOST})
   * // Custom hostname
   * var myNode = new RaidenClient('http://192.168.1.124:5004');
   * ```

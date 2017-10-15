@@ -3,11 +3,12 @@
 ## raiden-rpc
 A module for interacting with a Raiden network node over RPC.
 
+**Author**: Dylan Seago
+
 **Installation**
 ```
 npm install raiden-rpc
-```
-
+```  
 **Example**  
 Require the library
 ```javascript
@@ -16,7 +17,7 @@ var RaidenClient = require('raiden-rpc');
 Create a new raiden instance for a specific node. See below for possible options.
 ```javascript
 // Quick localhost development
-var localNode = RaidenClient.localNode(); // Uses ([DEFAULT_RPC_HOST](DEFAULT_RPC_HOST))
+var localNode = RaidenClient.localNode(); // Uses ([DEFAULT_RPC_HOST](#module_raiden-rpc--RaidenClient..DEFAULT_RPC_HOST))
 // Custom hostname
 var myNode = new RaidenClient('http://192.168.1.124:5004');
 ```
