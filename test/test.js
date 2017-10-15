@@ -3,6 +3,8 @@ const chai = require('chai');
 const ethAddress = require('ethereum-address');
 const RaidenClient = require('../index.js');
 
+require('request-promise-any').debug = true;
+
 const { expect } = chai;
 
 const raidenEndpoints = ['http://localhost:5000', 'http://localhost:5001'];
@@ -41,31 +43,40 @@ describe('RaidenClient', () => {
         }));
     });
 
-    describe('#joinNetwork()', () => {
+    describe.skip('#joinNetwork()', () => {
       it('should connect to testnetToken network', () =>
         node.joinNetwork(testnetToken, 40));
     });
   });
 
-  const transferId = Date.now();
-  const amountSent = 7;
-  describe('#sendTokens', () => {
-    it('node[0] should send tokens', () =>
-      nodes[0].sendTokens(testnetToken, nodes[1].address, amountSent, transferId));
-  });
+  describe('join network and send tokens', () => {
+    before(() => Promise.all(nodes.map(node =>
+      node.leaveNetwork(testnetToken).then(() =>
+        node.joinNetwork(testnetToken, 40)))));
 
-  describe('#getTokenEvents', () => {
-    let events;
-    it('node[1] should query token events', () =>
-      nodes[1].getTokenEvents(testnetToken).then((result) => { events = result; }));
-    console.log(events);
-  });
-
-  describeEach('node', nodes, (node) => {
-    describe('#leaveNetwork()', () => {
-      it('should leave the testnetToken network', () =>
-        node.leaveNetwork(testnetToken));
+    const transferId = Date.now();
+    const amountSent = 7;
+    describe('#sendTokens', () => {
+      it('node[0] should send tokens', () =>
+        nodes[0].sendTokens(testnetToken, nodes[1].address, amountSent, transferId));
     });
+
+    describe('#getTokenEvents', () => {
+      let events;
+      it('node[1] should query token events', () =>
+        nodes[1].getTokenEvents(testnetToken).then((result) => { events = result; }));
+      console.log(events);
+    });
+
+    describeEach('node', nodes, (node) => {
+      describe.skip('#leaveNetwork()', () => {
+        it('should leave the testnetToken network', () =>
+          node.leaveNetwork(testnetToken));
+      });
+    });
+
+    after(() => Promise.all(nodes.map(node =>
+      node.leaveNetwork(testnetToken))));
   });
 
   describe.skip('#openChannel()', () => { // openChannel broken on parity -> https://github.com/raiden-network/raiden/issues/879
