@@ -4,7 +4,7 @@
   "description": "Node wrapper for raiden RPC",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 60000",
+    "test": "mocha --timeout 300000",
     "docs": "jsdoc2md --param-list-format list index.js > api.md"
   },
   "repository": "dylanseago/raiden-rpc",
