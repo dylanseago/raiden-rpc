@@ -61,7 +61,7 @@ function pollBalance(address, interval, condition, rpcEndpoint = DEFAULT_RPC) {
     .then(() => getBalance(address, rpcEndpoint))
     .then(balance => (condition(balance)
       ? Promise.resolve(balance)
-      : Promise.delay(1000))
+      : Promise.delay(interval))
       .then(() => pollBalance(address, interval, condition, rpcEndpoint)))
     .cancellable();
 }
