@@ -1,4 +1,4 @@
-# Raiden RPC wrapper for node
+# Raiden network RPC wrapper for node
 Provides a convenient nodejs interface for interacting with the raiden RPC api.
 
 ## See also
