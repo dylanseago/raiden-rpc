@@ -1,43 +1,58 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const mkdirp = require('mkdirp');
-const parseArgs = require('minimist');
-const request = require('request-promise-any');
 
-const { normalize, getBalance, pollBalance } = require('./eth-utils');
+const parseArgs = require('minimist');
+const range = require('lodash.range');
+
+const { chain, mapPromise, execPromise } = require('./promiseUtils');
+
+const {
+  weiToEth, newAddress, requestFaucet, pollBalance,
+} = require('./ethUtils');
 
 const baseDir = path.resolve(path.dirname(process.argv[1]));
 
 const argv = parseArgs(process.argv.slice(2), {
-  strings: ['h', 'rpc-endpoint', 'password-file', 'keystore', 'logs-dir', 'poll-interval'],
   alias: {
-    nodeCount: ['c', 'count'],
-    rpcPortStart: ['p', 'first-port'],
-    pollInterval: ['poll-interval'],
+    nodeCount: ['n'],
+    rpcPortStart: ['p', 'rpc-port-start'],
+    discoveryPortStart: ['l', 'discovery-port-start'],
+    rpcBindIp: ['rpc-bind-ip'],
+    discoveryBindIp: ['discovery-bind-ip'],
     ethRpcEndpoint: ['h', 'rpc-endpoint'],
+    pollInterval: ['poll-interval'],
     keysDir: ['k', 'keystore'],
     passwordFile: ['password-file'],
+    clusterFile: ['cluster-file'],
     logsDir: ['logs-dir'],
   },
+  strings: ['rpcBindIp', 'discoveryBindIp', 'ethRpcEndpoint', 'passwordFile', 'keysDir', 'logsDir'],
   default: {
     nodeCount: 2,
-    rpcPortStart: 4010,
-    pollInterval: 2000,
+    rpcPortStart: 5001,
+    rpcBindIp: '127.0.0.1',
+    discoveryPortStart: 40001,
+    discoveryBindIp: '0.0.0.0',
     ethRpcEndpoint: 'http://localhost:8545',
-    passwordFile: path.join(baseDir, 'password.txt'),
+    pollInterval: 2000,
     keysDir: path.join(baseDir, 'keys'),
+    passwordFile: path.join(baseDir, 'password.txt'),
+    clusterFile: path.join(baseDir, 'cluster.json'),
     logsDir: path.join(baseDir, 'logs'),
   },
 });
 
 const {
-  nodeCount, rpcPortStart, pollInterval,
-  ethRpcEndpoint, passwordFile, keysDir, logsDir,
+  nodeCount, keysDir, passwordFile, clusterFile, ethRpcEndpoint, pollInterval,
+  rpcPortStart, rpcBindIp, discoveryPortStart, discoveryBindIp, logsDir,
 } = argv;
+
+const print = (...m) => process.stdout.write(...m);
+const println = (...m) => console.log(...m);
 
 function handleError(message) {
   if (message) {
@@ -62,71 +77,151 @@ mkdirp.sync(keysDir);
 
 // Generate password file if doesn't exist
 if (!fs.existsSync(passwordFile)) {
-  console.log('Generating password file...');
+  println('Generating password file for keys...');
   mkdirp.sync(path.dirname(passwordFile));
   const password = crypto.randomBytes(128).toString('base64');
   fs.writeFileSync(passwordFile, password, { mode: 0o600 });
-  console.log(`Password stored in ${passwordFile}`);
+  println(`Password stored in ${passwordFile}`);
 } else {
-  fs.acessSync(passwordFile, fs.access.R_OK);
+  fs.accessSync(passwordFile, fs.access.R_OK);
 }
 
-function execPromise(command, options = {}) {
-  return Promise.resolve().then(() => {
-    exec(command, options, (error, stdout, stderr) => {
-      if (error) {
-        Promise.reject(error);
+let lastClusterInfo;
+if (fs.existsSync(clusterFile)) {
+  lastClusterInfo = JSON.parse(fs.readFileSync(clusterFile, { encoding: 'utf8' }));
+}
+
+/**
+  * Polls address until balance is more than a certain amount.
+  *
+  * @param {String} address - Ethereum address
+  * @param {Number} [moreThanAmount] - wait until balance is at least this (in wei)
+  * @return {Promise}
+  * @fulfill {Number} the address balance (in wei)
+  * @reject {Error}
+  */
+function waitForFunds(address, moreThanAmount = 0) {
+  print('Waiting for funds...');
+  return pollBalance(address, pollInterval, (n) => {
+    print('.');
+    return n > moreThanAmount;
+  }, ethRpcEndpoint).then(chain(balance =>
+    println(`Received ${weiToEth(balance)} ETH`)));
+}
+
+/**
+  * Sends ether to the specified address using a faucet.
+  *
+  * @param {String} address - Ethereum address
+  * @returns {Promise}
+  * @fulfill {String} the original address
+  * @reject {Error} on faucet failure
+  */
+function fundAccount(address) {
+  print('Requesting faucet...');
+  return requestFaucet(address)
+    .then((success) => {
+      if (!success) {
+        throw new Error('Faucet unavailable.');
       }
-      Promise.resolve({ stdout, stderr });
+      print('Success. ');
+      return address;
     });
+}
+
+/**
+  * Creates new ethereum addresses, loads ether into each, and waits for their balances to
+  * update before resolving.
+  *
+  * @param {Number} count - number of addresses to setup
+  * @return {Promise}
+  * @fulfill {String[]} ethereum addresses created
+  * @reject {Error}
+  */
+function createAccounts(count) {
+  println(`Generating ${nodeCount} addresses...`);
+  return mapPromise(range(count), () =>
+    newAddress(passwordFile, keysDir)
+      .then(chain(address => print(`${address} - `)))
+      .then(chain(fundAccount))
+      .then(chain(waitForFunds)));
+}
+
+function checkNodeRunning(params, cb) {
+  const { address, rpc, discovery } = params;
+  return execPromise(`ps aux | grep -e ${address} -e ${rpc} -e ${discovery}`)
+    // .then(({ stdout }) => println(stdout))
+    .then(() => Promise.resolve(cb()));
+}
+
+/**
+  * Starts a new raiden node.
+  *
+  * @param {Object} params - Parameters to specifying how to start the node
+  * @param {String} params.address - Ethereum address to use
+  * @param {String} params.rpc - {@code <ip>:<port>} for RPC server to bind to
+  * @param {String} params.discovery - {@code <ip>:<port>} for raiden discovery protocol to bind to
+  * @param {String} params.log - Path to log stdout and stderr to
+  * @return {Promise}
+  * @fulfill {Object} containing original params and pid of the process
+  * @reject {Error}
+  */
+function startNode(params) {
+  const { address, rpc, discovery, log } = params;
+  return checkNodeRunning(params, () => {
+    const command = `raiden \
+      --listen-address ${rpc} \
+      --api-address ${discovery} \
+      --address ${address} \
+      --password-file ${passwordFile} \
+      --keystore-path ${keysDir} \
+      --eth-rpc-endpoint ${ethRpcEndpoint} \
+      --eth-client-communication >> ${log} 2>&1 &`;
+    fs.writeFileSync(log, `[${new Date().toISOString()}] ${process.env.SHELL || 'CMD'} ${command.replace(/--/g, '\n  --')}\n`, { flag: 'a' });
+    return execPromise(command)
+      .then(({ child: { pid } }) => Object.assign({ pid }, params))
+      .then(chain(() => println(`Started node for ${address} (rpc=${rpc}, discovery=${discovery})`)));
   });
 }
 
-const rpcPorts = [];
-for (let rpcPort = rpcPortStart; rpcPort < rpcPortStart + nodeCount; rpcPort += 1) {
-  rpcPorts.push(rpcPort);
+function determineNodeParams() {
+  if (lastClusterInfo) {
+    const { nodes } = lastClusterInfo;
+    if (nodes) {
+      println('Found saved cluster...');
+      return Promise.resolve(nodes);
+    }
+    throw new Error(`Invalid clusterFile: missing field 'nodes' ${clusterFile}`);
+  }
+  return createAccounts(nodeCount)
+    .then(addresses => addresses
+      .map((address, i) => ({
+        address,
+        rpc: `${rpcBindIp}:${rpcPortStart + i}`,
+        discovery: `${discoveryBindIp}:${discoveryPortStart + i}`,
+        log: path.join(logsDir, `node-${address}.log`),
+      })));
 }
 
-console.log(`Generating ${nodeCount} ethereum addresses...`);
-rpcPorts.reduce(
-  (lastPromise, rpcPort) => lastPromise.then(() =>
-    execPromise(`geth account new --password ${passwordFile} --keystore ${keysDir}`)
-      .then(({ stdout }) => normalize(stdout.match(/([0-9a-f]{40})/)[1]))
-      .then((address) => {
-        console.log(`Requesting ether for ${address} from faucet...`);
-        return request.get({
-          uri: `http://faucet.ropsten.be:3001/donate/${address}`,
-          json: true,
-        }).then((result) => {
-          if (!result || !Number.isInteger(result.paydate)) {
-            handleError(`Unrecognized faucet api result, got: ${JSON.stringify(result, null, 2)}`);
-          }
-          if (result.paydate === 0) {
-            console.log('Faucet unavailable for this address. Checking balance...');
-            return getBalance(address, ethRpcEndpoint).then((balance) => {
-              if (balance === 0) {
-                handleError(`Error: Balance of ${address} is 0`);
-              }
-              return balance;
-            });
-          }
-          console.log(`Polling every ${pollInterval}ms until balance is greater than zero...`);
-          return pollBalance(address, pollInterval, n => n > 0, ethRpcEndpoint);
-        }).then(() => {
-          const raidenRpcEndpoint = `127.0.0.1:${rpcPort}`;
-          const raidenListenEndpoint = `0.0.0.0:4${rpcPort}`;
-          const logFile = path.join(logsDir, `node-${address}.log`);
-          fs.writeFileSync(logFile, `[${new Date().toISOString()}] Starting raiden node...`, { flag: 'a' });
-          return execPromise(`raiden \
-            --listen-address ${raidenListenEndpoint} \
-            --api-address ${raidenRpcEndpoint} \
-            --address ${address} \
-            --password-file ${passwordFile} \
-            --keystore-path ${keysDir} \
-            --eth-rpc-endpoint ${ethRpcEndpoint} \
-            --eth-client-communication >> ${logFile} 2>&1 &`)
-            .then(() => console.log(`Started raiden node in background for ${address} with rpc ${raidenRpcEndpoint} listening on ${raidenListenEndpoint}`));
-        });
-      })),
-  Promise.resolve(),
-).catch(handleError);
+// TODO: Avoid killing nodes
+print('Killing all raiden processes...');
+execPromise('pkill -f raiden/bin/raiden')
+  .catch((err) => {
+    if (err.code === 1) {
+      println('none running.');
+      return Promise.resolve();
+    }
+    return Promise.reject(err);
+  })
+  .then(killResult => killResult && println('done.'))
+  .then(determineNodeParams)
+  .then(nodeParams => mapPromise(nodeParams, startNode))
+  .then(createdNodes => ({
+    created: new Date().toISOString(),
+    keystore: keysDir,
+    passwordFile,
+    ethRpcEndpoint,
+    nodes: createdNodes,
+  }))
+  .then(clusterInfo => fs.writeFileSync(clusterFile, JSON.stringify(clusterInfo, null, 2)))
+  .catch(handleError);
