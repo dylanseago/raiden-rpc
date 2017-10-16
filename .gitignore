@@ -60,3 +60,5 @@ typings/
 .DS_Store
 password.txt
 keys/
+cluster.json
+
